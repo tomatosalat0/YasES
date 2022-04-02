@@ -1,0 +1,207 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>YasES.Core</name>
+    </assembly>
+    <members>
+        <member name="F:YasES.Core.CheckpointToken.Beginning">
+            <summary>
+            Defines the first checkpoint token of the persistance store.
+            </summary>
+        </member>
+        <member name="F:YasES.Core.CheckpointToken.Ending">
+            <summary>
+            Defines the last possible checkpoint token for the persistance store.
+            </summary>
+        </member>
+        <member name="T:YasES.Core.CorrelationEventCollector">
+            <summary>
+            All collected events will get the defined correlation id set in their
+            header. If a passed event already contains a correlation id, an exception
+            is thrown if the correlation id are not equal.
+            </summary>
+        </member>
+        <member name="T:YasES.Core.EventCollector">
+            <summary>
+            A non-threadsafe simple event collector which simplifies the creation of
+            a <see cref="T:YasES.Core.CommitAttempt"/>.
+            </summary>
+        </member>
+        <member name="P:YasES.Core.EventCollector.IsEmpty">
+            <summary>
+            Returns true if no messages has been added yet, otherwise false.
+            </summary>
+        </member>
+        <member name="P:YasES.Core.EventCollector.IsCommited">
+            <summary>
+            Returns true if <see cref="M:YasES.Core.EventCollector.BuildCommit(YasES.Core.StreamIdentifier,YasES.Core.CommitId)"/> has been executed, otherwise
+            false.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.EventCollector.Add(System.Collections.Generic.IEnumerable{YasES.Core.IEventMessage})">
+            <summary>
+            Adds the provided <paramref name="messages"/> to the list of messages
+            to commit.
+            </summary>
+            <exception cref="T:System.InvalidOperationException">Is thrown if <see cref="M:YasES.Core.EventCollector.BuildCommit(YasES.Core.StreamIdentifier,YasES.Core.CommitId)"/> has been called before.</exception>
+        </member>
+        <member name="M:YasES.Core.EventCollector.BuildCommit(YasES.Core.StreamIdentifier,YasES.Core.CommitId)">
+            <summary>
+            Collects all previously added messages and adds them to a single 
+            <see cref="T:YasES.Core.CommitAttempt"/>. You can only call this method once.
+            </summary>
+        </member>
+        <member name="P:YasES.Core.EventMessage.EventName">
+            <inheritdoc/>
+        </member>
+        <member name="P:YasES.Core.EventMessage.Headers">
+            <inheritdoc/>
+        </member>
+        <member name="P:YasES.Core.EventMessage.Payload">
+            <inheritdoc/>
+        </member>
+        <member name="P:YasES.Core.EventMessage.CreationDateUtc">
+            <inheritdoc/>
+        </member>
+        <member name="P:YasES.Core.IEventCollector.IsEmpty">
+            <summary>
+            Returns true if no messages has been added yet, otherwise false.
+            </summary>
+        </member>
+        <member name="P:YasES.Core.IEventCollector.IsCommited">
+            <summary>
+            Returns true if <see cref="M:YasES.Core.IEventCollector.BuildCommit(YasES.Core.StreamIdentifier,YasES.Core.CommitId)"/> has been executed, otherwise
+            false.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.IEventCollector.Add(System.Collections.Generic.IEnumerable{YasES.Core.IEventMessage})">
+            <summary>
+            Adds the provided <paramref name="messages"/> to the list of messages
+            to commit.
+            </summary>
+            <exception cref="T:System.InvalidOperationException">Is thrown if <see cref="M:YasES.Core.IEventCollector.BuildCommit(YasES.Core.StreamIdentifier,YasES.Core.CommitId)"/> has been called before.</exception>
+        </member>
+        <member name="M:YasES.Core.IEventCollector.BuildCommit(YasES.Core.StreamIdentifier,YasES.Core.CommitId)">
+            <summary>
+            Collects all previously added messages and adds them to a single 
+            <see cref="T:YasES.Core.CommitAttempt"/>. You can only call this method once.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.IEventCollectorExtensions.BuildCommit(YasES.Core.IEventCollector,YasES.Core.StreamIdentifier)">
+            <summary>
+            Creates the <see cref="T:YasES.Core.CommitAttempt"/> with a generated <see cref="T:YasES.Core.CommitId"/>.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.IEventCollectorExtensions.Add(YasES.Core.IEventCollector,YasES.Core.IEventMessage)">
+            <summary>
+            Adds the provided <paramref name="message"/> to the list of messages
+            to commit.
+            </summary>
+            <exception cref="T:System.InvalidOperationException">Is thrown if <see cref="M:YasES.Core.IEventCollector.BuildCommit(YasES.Core.StreamIdentifier,YasES.Core.CommitId)"/> has been called before.</exception>
+        </member>
+        <member name="M:YasES.Core.IEventCollectorExtensions.Add(YasES.Core.IEventCollector,YasES.Core.IEventMessage[])">
+            <summary>
+            Adds the provided <paramref name="messages"/> to the list of messages
+            to commit.
+            </summary>
+            <exception cref="T:System.InvalidOperationException">Is thrown if <see cref="M:YasES.Core.IEventCollector.BuildCommit(YasES.Core.StreamIdentifier,YasES.Core.CommitId)"/> has been called before.</exception>
+        </member>
+        <member name="P:YasES.Core.IEventMessage.EventName">
+            <summary>
+            Defines the name of the event. 
+            </summary>
+        </member>
+        <member name="P:YasES.Core.IEventMessage.Headers">
+            <summary>
+            Contains meta-information of the event.
+            </summary>
+        </member>
+        <member name="P:YasES.Core.IEventMessage.Payload">
+            <summary>
+            The payload of the event.
+            </summary>
+        </member>
+        <member name="P:YasES.Core.IEventMessage.CreationDateUtc">
+            <summary>
+            The point in time this instance was created on.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.IEventReadExtensions.ReadForwardFrom(YasES.Core.IEventRead,YasES.Core.StreamIdentifier,YasES.Core.CheckpointToken)">
+            <summary>
+            Returns a reader for the <paramref name="stream"/>, starting at <paramref name="lowerBoundExclusive"/> going to the future.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.IEventReadExtensions.ReadForwardFromTo(YasES.Core.IEventRead,YasES.Core.StreamIdentifier,YasES.Core.CheckpointToken,YasES.Core.CheckpointToken)">
+            <summary>
+            Returns a reader for the <paramref name="stream"/>, starting at <paramref name="lowerBoundExclusive"/> going to the future. 
+            The reader will end as soon as <paramref name="upperBoundExclusive"/> has been returned or no more messages
+            could be found inside the store.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.IEventReadExtensions.ReadBackwardFrom(YasES.Core.IEventRead,YasES.Core.StreamIdentifier,YasES.Core.CheckpointToken)">
+            <summary>
+            Returns a reader for the <paramref name="stream"/>, starting at the <paramref name="upperBoundExclusive"/> going to the past.
+            The reader will end as soon as the start of the stream has been reached.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.IEventReadExtensions.ReadBackwardFromTo(YasES.Core.IEventRead,YasES.Core.StreamIdentifier,YasES.Core.CheckpointToken,YasES.Core.CheckpointToken)">
+            <summary>
+            Returns a reader for the <paramref name="stream"/>, starting at the <paramref name="lowerBoundExclusive"/> going to the past.
+            The reader will end as soon as <paramref name="upperBoundExclusive"/> has been returned or the start of the stream has been reached.
+            Note that <paramref name="lowerBoundExclusive"/> must be greater than <paramref name="upperBoundExclusive"/>.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.IEventWrite.Commit(YasES.Core.CommitAttempt)">
+            <summary>
+            Saves the provided <paramref name="attempt"/> to the persistant store.
+            </summary>
+        </member>
+        <member name="P:YasES.Core.IReadEventMessage.Checkpoint">
+            <summary>
+            The checkpoint token within the persistance store.
+            </summary>
+        </member>
+        <member name="P:YasES.Core.IReadEventMessage.CommitId">
+            <summary>
+            The id of the commit this message has been added to the persistance store.
+            </summary>
+        </member>
+        <member name="P:YasES.Core.IReadEventMessage.StreamIdentifier">
+            <summary>
+            Gets the stream identifier this message belongs to.
+            </summary>
+        </member>
+        <member name="P:YasES.Core.IReadEventMessage.CommitTimeUtc">
+            <summary>
+            The date+time value the message has been commited to the persistance store.
+            </summary>
+        </member>
+        <member name="P:YasES.Core.StreamIdentifier.BucketId">
+            <summary>
+            The bucket name the stream lives in.
+            </summary>
+        </member>
+        <member name="P:YasES.Core.StreamIdentifier.StreamId">
+            <summary>
+            The name of the stream. <see cref="P:YasES.Core.StreamIdentifier.MatchesAllStreams"/> if the identifier
+            is a wildcard identifier.
+            </summary>
+        </member>
+        <member name="P:YasES.Core.StreamIdentifier.MatchesAllStreams">
+            <summary>
+            Returns true if <see cref="P:YasES.Core.StreamIdentifier.StreamId"/> points to all streams, otherwise false.
+            </summary>
+        </member>
+        <member name="F:YasES.Core.SystemClock.ResolveUtcNow">
+            <summary>
+            The resolver for the system clock. Do not use the resolver
+            directly, use <see cref="P:YasES.Core.SystemClock.UtcNow"/>.
+            </summary>
+        </member>
+        <member name="P:YasES.Core.SystemClock.UtcNow">
+            <summary>
+            Returns the system utc time.
+            </summary>
+        </member>
+    </members>
+</doc>
