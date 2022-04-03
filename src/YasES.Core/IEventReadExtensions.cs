@@ -11,7 +11,7 @@ namespace YasES.Core
         public static IEnumerable<IReadEventMessage> ReadForwardFrom(this IEventRead reader, StreamIdentifier stream, CheckpointToken lowerBoundExclusive)
         {
             return reader.Read(ReadPredicateBuilder.Custom()
-                .FromSingleStream(stream)
+                .FromStream(stream)
                 .ReadForwards()
                 .IncludeAllEvents()
                 .RaisedAfterCheckpoint(lowerBoundExclusive)
@@ -26,7 +26,7 @@ namespace YasES.Core
         public static IEnumerable<IReadEventMessage> ReadForwardFromTo(this IEventRead reader, StreamIdentifier stream, CheckpointToken lowerBoundExclusive, CheckpointToken upperBoundExclusive)
         {
             return reader.Read(ReadPredicateBuilder.Custom()
-                .FromSingleStream(stream)
+                .FromStream(stream)
                 .ReadForwards()
                 .IncludeAllEvents()
                 .RaisedBetweenCheckpoints(lowerBoundExclusive, upperBoundExclusive)
@@ -40,7 +40,7 @@ namespace YasES.Core
         public static IEnumerable<IReadEventMessage> ReadBackwardFrom(this IEventRead reader, StreamIdentifier stream, CheckpointToken upperBoundExclusive)
         {
             return reader.Read(ReadPredicateBuilder.Custom()
-                .FromSingleStream(stream)
+                .FromStream(stream)
                 .ReadBackwards()
                 .IncludeAllEvents()
                 .RaisedBeforeCheckpoint(upperBoundExclusive)
@@ -55,7 +55,7 @@ namespace YasES.Core
         public static IEnumerable<IReadEventMessage> ReadBackwardFromTo(this IEventRead reader, StreamIdentifier stream, CheckpointToken lowerBoundExclusive, CheckpointToken upperBoundExclusive)
         {
             return reader.Read(ReadPredicateBuilder.Custom()
-                .FromSingleStream(stream)
+                .FromStream(stream)
                 .ReadBackwards()
                 .IncludeAllEvents()
                 .RaisedBetweenCheckpoints(lowerBoundExclusive, upperBoundExclusive)

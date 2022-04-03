@@ -10,7 +10,7 @@ namespace YasES.Examples.PersonList.Users
         {
             public const string Bucket = "UserManagement";
 
-            public const string UserStream = "User/";
+            public const string UserStreamPrefix = "User/";
         }
 
         private readonly IEventReadWrite _eventStore;
@@ -28,7 +28,7 @@ namespace YasES.Examples.PersonList.Users
             Guid id = Guid.NewGuid();
             _eventStore.Commit(new EventCollector()
                 .Add(UserCreatedEvent.Build(id, userName))
-                .BuildCommit(StreamIdentifier.SingleStream(Streams.Bucket, Streams.UserStream + id.ToString())));
+                .BuildCommit(StreamIdentifier.SingleStream(Streams.Bucket, Streams.UserStreamPrefix + id.ToString())));
             return id;
         }
 
@@ -41,7 +41,7 @@ namespace YasES.Examples.PersonList.Users
 
             _eventStore.Commit(new EventCollector()
                 .Add(UserRenamedEvent.Build(userId, newUserName))
-                .BuildCommit(StreamIdentifier.SingleStream(Streams.Bucket, Streams.UserStream + userId.ToString())));
+                .BuildCommit(StreamIdentifier.SingleStream(Streams.Bucket, Streams.UserStreamPrefix + userId.ToString())));
         }
 
         public void DeleteUser(Guid userId)
@@ -50,7 +50,7 @@ namespace YasES.Examples.PersonList.Users
 
             _eventStore.Commit(new EventCollector()
                 .Add(UserDeletedEvent.Build(userId))
-                .BuildCommit(StreamIdentifier.SingleStream(Streams.Bucket, Streams.UserStream + userId.ToString())));
+                .BuildCommit(StreamIdentifier.SingleStream(Streams.Bucket, Streams.UserStreamPrefix + userId.ToString())));
         }
 
         private void EnsureValidUserName(string userName)
@@ -86,7 +86,7 @@ namespace YasES.Examples.PersonList.Users
         private bool UserNameAlreadyExists(string userName)
         {
             ReadPredicate predicate = ReadPredicateBuilder.Custom()
-                .FromSingleStream(StreamIdentifier.AllStreams(Streams.Bucket))
+                .FromAllStreamsInBucket(Streams.Bucket)
                 .ReadBackwards()
                 .OnlyIncluding(UserCreatedEvent.Name, UserRenamedEvent.Name, UserDeletedEvent.Name)
                 .WithoutCheckpointLimit()
@@ -115,7 +115,7 @@ namespace YasES.Examples.PersonList.Users
         private DateTime? LastTimeUserHasBeenRenamed(Guid userId)
         {
             ReadPredicate predicate = ReadPredicateBuilder.Custom()
-                .FromSingleStream(StreamIdentifier.SingleStream(Streams.Bucket, Streams.UserStream + userId.ToString()))
+                .FromStream(StreamIdentifier.SingleStream(Streams.Bucket, Streams.UserStreamPrefix + userId.ToString()))
                 .ReadBackwards()
                 .OnlyIncluding(UserCreatedEvent.Name, UserRenamedEvent.Name)
                 .WithoutCheckpointLimit()
@@ -130,7 +130,7 @@ namespace YasES.Examples.PersonList.Users
         private bool UserExists(Guid userId)
         {
             ReadPredicate predicate = ReadPredicateBuilder.Custom()
-                .FromSingleStream(StreamIdentifier.SingleStream(Streams.Bucket, Streams.UserStream + userId.ToString()))
+                .FromStream(StreamIdentifier.SingleStream(Streams.Bucket, Streams.UserStreamPrefix + userId.ToString()))
                 .ReadBackwards()
                 .OnlyIncluding(UserCreatedEvent.Name, UserDeletedEvent.Name)
                 .WithoutCheckpointLimit()

@@ -14,7 +14,7 @@ namespace YasES.Core
         public static ReadPredicate Forwards(StreamIdentifier identifier)
         {
             return Custom()
-                .FromSingleStream(identifier)
+                .FromStream(identifier)
                 .ReadForwards()
                 .IncludeAllEvents()
                 .WithoutCheckpointLimit()
@@ -24,7 +24,7 @@ namespace YasES.Core
         public static ReadPredicate Forwards(StreamIdentifier identifier, params StreamIdentifier[] identifiers)
         {
             return Custom()
-                .FromMultipleStreams((new[] { identifier }).Concat(identifiers))
+                .FromStreams((new[] { identifier }).Concat(identifiers))
                 .ReadForwards()
                 .IncludeAllEvents()
                 .WithoutCheckpointLimit()
@@ -34,7 +34,7 @@ namespace YasES.Core
         public static ReadPredicate Backwards(StreamIdentifier identifier)
         {
             return Custom()
-                .FromSingleStream(identifier)
+                .FromStream(identifier)
                 .ReadBackwards()
                 .IncludeAllEvents()
                 .WithoutCheckpointLimit()
@@ -44,7 +44,7 @@ namespace YasES.Core
         public static ReadPredicate Backwards(StreamIdentifier identifier, params StreamIdentifier[] identifiers)
         {
             return Custom()
-                .FromMultipleStreams((new[] { identifier }).Concat(identifiers))
+                .FromStreams((new[] { identifier }).Concat(identifiers))
                 .ReadBackwards()
                 .IncludeAllEvents()
                 .WithoutCheckpointLimit()
@@ -61,21 +61,21 @@ namespace YasES.Core
             private CheckpointToken _upperBound;
             private string? _correlationId;
 
-            public IAfterStreams FromSingleStream(StreamIdentifier identifier)
+            public IAfterStreams FromStream(StreamIdentifier identifier)
             {
                 _streams.Add(identifier);
                 return this;
             }
 
-            public IAfterStreams FromMultipleStreams(IEnumerable<StreamIdentifier> identifiers)
+            public IAfterStreams FromStreams(IEnumerable<StreamIdentifier> identifiers)
             {
                 _streams.AddRange(identifiers);
                 return this;
             }
 
-            public IAfterStreams FromMultipleStreams(params StreamIdentifier[] identifiers)
+            public IAfterStreams FromStreams(params StreamIdentifier[] identifiers)
             {
-                return FromMultipleStreams((IEnumerable<StreamIdentifier>)identifiers);
+                return FromStreams((IEnumerable<StreamIdentifier>)identifiers);
             }
 
             public IAfterDirection ReadBackwards()
@@ -144,17 +144,19 @@ namespace YasES.Core
 
             public ReadPredicate Build()
             {
+                if (_streams.Select(p => p.BucketId).Distinct().Count() > 1)
+                    throw new InvalidOperationException($"A single read predicate must not contain streams from different buckets");
                 return new ReadPredicate(_streams, _goBackwards, _eventNames, _eventNamesIncludes, _correlationId, _lowerBound, _upperBound);
             }
         }
 
         public interface IAfterInit
         {
-            IAfterStreams FromSingleStream(StreamIdentifier identifier);
+            IAfterStreams FromStream(StreamIdentifier identifier);
 
-            IAfterStreams FromMultipleStreams(IEnumerable<StreamIdentifier> identifiers);
+            IAfterStreams FromStreams(IEnumerable<StreamIdentifier> identifiers);
 
-            IAfterStreams FromMultipleStreams(params StreamIdentifier[] identifiers);
+            IAfterStreams FromStreams(params StreamIdentifier[] identifiers);
         }
 
         public interface IAfterStreams
@@ -196,7 +198,7 @@ namespace YasES.Core
     {
         public static ReadPredicateBuilder.IAfterStreams FromAllStreamsInBucket(this ReadPredicateBuilder.IAfterInit builder, string bucketId)
         {
-            return builder.FromSingleStream(StreamIdentifier.AllStreams(bucketId));
+            return builder.FromStream(StreamIdentifier.AllStreams(bucketId));
         }
     }
 

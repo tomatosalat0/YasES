@@ -10,11 +10,6 @@ namespace YasES.Core.Persistance
             return JsonSerialization.Serialize(message.Headers);
         }
 
-        public static IReadOnlyDictionary<string, object> DeserializeHeaderJson(byte[] data)
-        {
-            return JsonSerialization.Deserialize<Dictionary<string, object>>(data.AsSpan());
-        }
-
 #pragma warning disable SA1011 // Closing square brackets should be spaced correctly
         public static IReadOnlyDictionary<string, object> DeserializeHeaderJsonOrDefault(byte[]? data)
 #pragma warning restore SA1011 // Closing square brackets should be spaced correctly

@@ -211,7 +211,7 @@ namespace YasES.Persistance.Sqlite.Tests.UnitTests
             engine.Commit(commit);
 
             ReadPredicate predicate = ReadPredicateBuilder.Custom()
-                .FromSingleStream(identifier)
+                .FromStream(identifier)
                 .ReadForwards()
                 .OnlyIncluding(new HashSet<string>() { "Event0", "Event1" })
                 .WithoutCheckpointLimit()
@@ -244,7 +244,7 @@ namespace YasES.Persistance.Sqlite.Tests.UnitTests
             engine.Commit(commit);
 
             ReadPredicate predicate = ReadPredicateBuilder.Custom()
-                .FromSingleStream(identifier)
+                .FromStream(identifier)
                 .ReadForwards()
                 .AllExcluding(new HashSet<string>() { "Event0", "Event1" })
                 .WithoutCheckpointLimit()
@@ -415,7 +415,7 @@ namespace YasES.Persistance.Sqlite.Tests.UnitTests
             engine.Commit(stream1, new EventMessage("MyEvent1", new Dictionary<string, object>() { [CommonMetaData.CorrelationId] = Guid.NewGuid().ToString() }, Memory<byte>.Empty));
 
             var predicate = ReadPredicateBuilder.Custom()
-                .FromSingleStream(stream1)
+                .FromStream(stream1)
                 .ReadForwards()
                 .IncludeAllEvents()
                 .HavingTheCorrelationId(correlationId)
@@ -445,14 +445,74 @@ namespace YasES.Persistance.Sqlite.Tests.UnitTests
 
             Assert.AreEqual(1, engine.Read(ReadPredicateBuilder.Forwards(stream1)).Count());
             Assert.AreEqual(1, engine.Read(
-                ReadPredicateBuilder.Custom().FromSingleStream(stream1).ReadForwards().OnlyIncluding("MyEv'ent1").WithoutCheckpointLimit().Build()
+                ReadPredicateBuilder.Custom().FromStream(stream1).ReadForwards().OnlyIncluding("MyEv'ent1").WithoutCheckpointLimit().Build()
             ).Count());
             Assert.AreEqual(1, engine.Read(
-                ReadPredicateBuilder.Custom().FromSingleStream(stream1).ReadForwards().AllExcluding("MyEv'ent2").WithoutCheckpointLimit().Build()
+                ReadPredicateBuilder.Custom().FromStream(stream1).ReadForwards().AllExcluding("MyEv'ent2").WithoutCheckpointLimit().Build()
             ).Count());
             Assert.AreEqual(1, engine.Read(
-                ReadPredicateBuilder.Custom().FromSingleStream(stream1).ReadForwards().IncludeAllEvents().HavingTheCorrelationId(correlationId).Build()
+                ReadPredicateBuilder.Custom().FromStream(stream1).ReadForwards().IncludeAllEvents().HavingTheCorrelationId(correlationId).Build()
             ).Count());
+        }
+
+        [TestMethod]
+        public void SqliteEventReadWriteReturnsStreamsWithTheSamePrefix()
+        {
+            SqliteConnectionFactory factory = new SqliteConnectionFactory("Data Source=EventSource_InMemory_Test;Mode=Memory;Cache=Shared;");
+            using IDbConnection connectionPersistance = factory.Open();
+            SqlitePersistanceEngine engine = new SqlitePersistanceEngine(factory);
+            engine.Initialize();
+
+            engine.Commit(new EventCollector().Add(new EventMessage("event1", Memory<byte>.Empty)).BuildCommit(StreamIdentifier.SingleStream("bucket", "A/stream1")));
+            engine.Commit(new EventCollector().Add(new EventMessage("event2", Memory<byte>.Empty)).BuildCommit(StreamIdentifier.SingleStream("bucket", "A/stream2")));
+            engine.Commit(new EventCollector().Add(new EventMessage("event3", Memory<byte>.Empty)).BuildCommit(StreamIdentifier.SingleStream("bucket", "B/stream3")));
+            engine.Commit(new EventCollector().Add(new EventMessage("event3", Memory<byte>.Empty)).BuildCommit(StreamIdentifier.SingleStream("bucket", "a/stream4")));
+            engine.Commit(new EventCollector().Add(new EventMessage("event5", Memory<byte>.Empty)).BuildCommit(StreamIdentifier.SingleStream("different", "A/stream5")));
+
+            var predicate = ReadPredicateBuilder.Forwards(StreamIdentifier.StreamsPrefixedWith("bucket", "A/"));
+            List<IReadEventMessage> read = engine.Read(predicate).ToList();
+            Assert.AreEqual(2, read.Count);
+            Assert.AreEqual("A/stream1", read[0].StreamIdentifier.StreamId);
+            Assert.AreEqual("A/stream2", read[1].StreamIdentifier.StreamId);
+        }
+
+        [TestMethod]
+        public void SqliteEventReadWriteReturnsStreamsWithTheSamePrefixAndOneExactStream()
+        {
+            SqliteConnectionFactory factory = new SqliteConnectionFactory("Data Source=EventSource_InMemory_Test;Mode=Memory;Cache=Shared;");
+            using IDbConnection connectionPersistance = factory.Open();
+            SqlitePersistanceEngine engine = new SqlitePersistanceEngine(factory);
+            engine.Initialize();
+
+            engine.Commit(new EventCollector().Add(new EventMessage("event1", Memory<byte>.Empty)).BuildCommit(StreamIdentifier.SingleStream("bucket", "A/stream1")));
+            engine.Commit(new EventCollector().Add(new EventMessage("event2", Memory<byte>.Empty)).BuildCommit(StreamIdentifier.SingleStream("bucket", "A/stream2")));
+            engine.Commit(new EventCollector().Add(new EventMessage("event3", Memory<byte>.Empty)).BuildCommit(StreamIdentifier.SingleStream("bucket", "B/stream3")));
+            engine.Commit(new EventCollector().Add(new EventMessage("event3", Memory<byte>.Empty)).BuildCommit(StreamIdentifier.SingleStream("bucket", "a/stream4")));
+            engine.Commit(new EventCollector().Add(new EventMessage("event5", Memory<byte>.Empty)).BuildCommit(StreamIdentifier.SingleStream("different", "A/stream5")));
+
+            var predicate = ReadPredicateBuilder.Forwards(StreamIdentifier.StreamsPrefixedWith("bucket", "A/"), StreamIdentifier.SingleStream("bucket", "a/stream4"));
+            List<IReadEventMessage> read = engine.Read(predicate).ToList();
+            Assert.AreEqual(3, read.Count);
+            Assert.AreEqual("A/stream1", read[0].StreamIdentifier.StreamId);
+            Assert.AreEqual("A/stream2", read[1].StreamIdentifier.StreamId);
+            Assert.AreEqual("a/stream4", read[2].StreamIdentifier.StreamId);
+        }
+
+        [TestMethod]
+        public void SqliteEventReadWriteEscapesPrefixString()
+        {
+            SqliteConnectionFactory factory = new SqliteConnectionFactory("Data Source=EventSource_InMemory_Test;Mode=Memory;Cache=Shared;");
+            using IDbConnection connectionPersistance = factory.Open();
+            SqlitePersistanceEngine engine = new SqlitePersistanceEngine(factory);
+            engine.Initialize();
+
+            engine.Commit(new EventCollector().Add(new EventMessage("event1", Memory<byte>.Empty)).BuildCommit(StreamIdentifier.SingleStream("bucket", "A%stream_group/stream1")));
+            engine.Commit(new EventCollector().Add(new EventMessage("event1", Memory<byte>.Empty)).BuildCommit(StreamIdentifier.SingleStream("bucket", "AstreamNgroup/stream1")));
+            engine.Commit(new EventCollector().Add(new EventMessage("event1", Memory<byte>.Empty)).BuildCommit(StreamIdentifier.SingleStream("bucket", "AhstreamNgroup/stream1")));
+
+            var predicate = ReadPredicateBuilder.Forwards(StreamIdentifier.StreamsPrefixedWith("bucket", "A%stream_group"));
+            List<IReadEventMessage> read = engine.Read(predicate).ToList();
+            Assert.AreEqual(1, read.Count);
         }
     }
 }

@@ -241,7 +241,7 @@ namespace YasES.Core.Tests.UnitTests.Persistance.InMemory
             engine.Commit(stream1, new EventMessage("MyEvent1", new Dictionary<string, object>() { [CommonMetaData.CorrelationId] = Guid.NewGuid().ToString() }, Memory<byte>.Empty));
 
             var predicate = ReadPredicateBuilder.Custom()
-                .FromSingleStream(stream1)
+                .FromStream(stream1)
                 .ReadForwards()
                 .IncludeAllEvents()
                 .HavingTheCorrelationId(correlationId)
@@ -250,6 +250,23 @@ namespace YasES.Core.Tests.UnitTests.Persistance.InMemory
             List<IReadEventMessage> read = engine.Read(predicate).ToList();
             Assert.AreEqual(1, read.Count);
             Assert.AreEqual(correlationId, read[0].Headers[CommonMetaData.CorrelationId]);
+        }
+
+        [TestMethod]
+        public void EngineReturnsStreamsWithTheSamePrefix()
+        {
+            IEventReadWrite engine = new InMemoryPersistanceEngine();
+            engine.Commit(new EventCollector().Add(new EventMessage("event1", Memory<byte>.Empty)).BuildCommit(StreamIdentifier.SingleStream("bucket", "A/stream1")));
+            engine.Commit(new EventCollector().Add(new EventMessage("event2", Memory<byte>.Empty)).BuildCommit(StreamIdentifier.SingleStream("bucket", "A/stream2")));
+            engine.Commit(new EventCollector().Add(new EventMessage("event3", Memory<byte>.Empty)).BuildCommit(StreamIdentifier.SingleStream("bucket", "B/stream3")));
+            engine.Commit(new EventCollector().Add(new EventMessage("event3", Memory<byte>.Empty)).BuildCommit(StreamIdentifier.SingleStream("bucket", "a/stream4")));
+            engine.Commit(new EventCollector().Add(new EventMessage("event5", Memory<byte>.Empty)).BuildCommit(StreamIdentifier.SingleStream("different", "A/stream5")));
+
+            var predicate = ReadPredicateBuilder.Forwards(StreamIdentifier.StreamsPrefixedWith("bucket", "A/"));
+            List<IReadEventMessage> read = engine.Read(predicate).ToList();
+            Assert.AreEqual(2, read.Count);
+            Assert.AreEqual("A/stream1", read[0].StreamIdentifier.StreamId);
+            Assert.AreEqual("A/stream2", read[1].StreamIdentifier.StreamId);
         }
     }
 }

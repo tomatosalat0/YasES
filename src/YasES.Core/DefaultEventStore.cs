@@ -11,19 +11,24 @@ namespace YasES.Core
         {
             _container = container;
             Events = container.Resolve<IEventReadWrite>();
+            Services.Register<IEventStore>(this);
+            Services.Register<IEventReadWrite>(this.Events);
         }
 
         public IEventReadWrite Events { get; }
+
+        public Container Services { get; } = new Container();
 
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposedValue)
             {
+                _disposedValue = true;
                 if (disposing)
                 {
+                    Services.Dispose();
                     _container.Dispose();
                 }
-                _disposedValue = true;
             }
         }
 

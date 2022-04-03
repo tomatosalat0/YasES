@@ -96,10 +96,10 @@ namespace YasES.Persistance.Sqlite
 
             private static void FillBoundsFilter(List<string> target, ReadPredicate predicate)
             {
-                if (predicate.LowerBound > CheckpointToken.Beginning)
-                    target.Add($"Checkpoint > {predicate.LowerBound.Value}");
-                if (predicate.UpperBound < CheckpointToken.Ending)
-                    target.Add($"Checkpoint < {predicate.UpperBound.Value}");
+                if (predicate.LowerExclusiveBound > CheckpointToken.Beginning)
+                    target.Add($"Checkpoint > {predicate.LowerExclusiveBound.Value}");
+                if (predicate.UpperExclusiveBound < CheckpointToken.Ending)
+                    target.Add($"Checkpoint < {predicate.UpperExclusiveBound.Value}");
             }
 
             private static string BuildSQLiteStringValue(string input)
@@ -151,11 +151,31 @@ namespace YasES.Persistance.Sqlite
                     } 
                     else
                     {
-                        string streamCondition = $"StreamId IN ({string.Join(',', all.Select(p => p.StreamId).Distinct().Select(BuildSQLiteStringValue))})";
-                        orConditions.Add($"({bucketCondition} AND {streamCondition})");
+                        List<StreamIdentifier> exactMatch = all.Where(p => p.IsSingleStream).ToList();
+                        List<StreamIdentifier> prefixMatch = all.Where(p => !p.IsSingleStream && !p.MatchesAllStreams).ToList();
+                        string exactCondition = $"StreamId IN ({string.Join(',', exactMatch.Select(p => p.StreamId).Distinct().Select(BuildSQLiteStringValue))})";
+                        string prefixCondition = BuildStreamPrefixConditions(prefixMatch);
+                        if (prefixMatch.Count == 0)
+                            orConditions.Add($"({bucketCondition} AND {exactCondition})");
+                        else
+                        if (exactMatch.Count == 0)
+                            orConditions.Add($"({bucketCondition} AND {prefixCondition})");
+                        else
+                            orConditions.Add($"({bucketCondition} AND ({exactCondition} OR {prefixCondition}))");
                     }
                 }
                 target.Add($"({ string.Join(" OR ", orConditions.Select(p => $"({p})")) })");
+            }
+
+            private static string BuildStreamPrefixConditions(IEnumerable<StreamIdentifier> prefixStreams)
+            {
+                List<string> conditions = new List<string>();
+                foreach (var stream in prefixStreams)
+                {
+                    string condition = $"(StreamId BETWEEN {BuildSQLiteStringValue(stream.StreamIdPrefix)} AND {BuildSQLiteStringValue(stream.StreamIdPrefix + '\uFFFF')})";
+                    conditions.Add(condition);
+                }
+                return $"({string.Join(" OR ", conditions)})";
             }
 
             private static IDbDataParameter DefineParameter(IDbCommand command, string name, DbType type)

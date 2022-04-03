@@ -17,7 +17,7 @@ namespace YasES.Core
         {
             if (messages is null) throw new ArgumentNullException(nameof(messages));
             if (messages.Count == 0) throw new ArgumentException("You must provide at least one message");
-            if (streamIdentifier.MatchesAllStreams) throw new ArgumentException($"The stream identifier must point to a single stream");
+            if (!streamIdentifier.IsSingleStream) throw new ArgumentException($"The stream identifier must point to a single stream");
             StreamIdentifier = streamIdentifier;
             CommitId = commitId;
             Messages = messages;

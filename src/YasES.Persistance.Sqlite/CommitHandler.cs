@@ -94,7 +94,7 @@ namespace YasES.Persistance.Sqlite
             int index = 0;
             foreach (var message in commit.Messages)
             {
-                messageId.Value = message.Headers.GetValueOrDefault(CommonMetaData.MessageId) ?? DBNull.Value;
+                messageId.Value = message.Headers.GetValueOrDefault(CommonMetaData.EventId) ?? DBNull.Value;
                 correlationId.Value = message.Headers.GetValueOrDefault(CommonMetaData.CorrelationId) ?? DBNull.Value;
                 causationId.Value = message.Headers.GetValueOrDefault(CommonMetaData.CausationId) ?? DBNull.Value;
 

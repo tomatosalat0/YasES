@@ -51,6 +51,11 @@
             <see cref="T:YasES.Core.CommitAttempt"/>. You can only call this method once.
             </summary>
         </member>
+        <member name="T:YasES.Core.EventIdCollector">
+            <summary>
+            All collected events will get a new event id.
+            </summary>
+        </member>
         <member name="P:YasES.Core.EventMessage.EventName">
             <inheritdoc/>
         </member>
@@ -176,6 +181,84 @@
             The date+time value the message has been commited to the persistance store.
             </summary>
         </member>
+        <member name="T:YasES.Core.ReadPredicate">
+            <summary>
+            Defines the operation and conditions to execute when reading from 
+            the event store. Note that a single stream predicate can not
+            request streams from multiple buckets simultaniously.
+            </summary>
+        </member>
+        <member name="P:YasES.Core.ReadPredicate.Streams">
+            <summary>
+            The streams to return within this request. Note that
+            all streams will be in the same bucket.
+            </summary>
+        </member>
+        <member name="P:YasES.Core.ReadPredicate.Reverse">
+            <summary>
+            True if the events should get returned in the reverse 
+            order they were created. If false, the events should
+            get returned in the order they where added to the streams.
+            </summary>
+        </member>
+        <member name="P:YasES.Core.ReadPredicate.EventNamesFilter">
+            <summary>
+            Optional: if null, no filtering based on the event
+            names should happen. If set, the list will 
+            contain the exact event names to filter by. 
+            See <see cref="P:YasES.Core.ReadPredicate.EventNamesIncluding"/> if the
+            filter is "include" or "exclude".
+            </summary>
+        </member>
+        <member name="P:YasES.Core.ReadPredicate.EventNamesIncluding">
+            <summary>
+            If true, only the events defined in <see cref="P:YasES.Core.ReadPredicate.EventNamesFilter"/>
+            should be included in the result. If false, all events
+            exect those having one of the specified names in <see cref="P:YasES.Core.ReadPredicate.EventNamesFilter"/>
+            should be returned.
+            </summary>
+        </member>
+        <member name="P:YasES.Core.ReadPredicate.CorrelationId">
+            <summary>
+            Optional: if null, this property will get ignored. If defined,
+            only events having the specified correlationId in their header should
+            get returned.
+            </summary>
+        </member>
+        <member name="P:YasES.Core.ReadPredicate.LowerExclusiveBound">
+            <summary>
+            Defines the exlusive lower bound for the checkpoint token. Only
+            events which have a checkpoint token greater than this value
+            will get returned. The lowest value will be <see cref="F:YasES.Core.CheckpointToken.Beginning"/>.
+            </summary>
+        </member>
+        <member name="P:YasES.Core.ReadPredicate.UpperExclusiveBound">
+            <summary>
+            Defines the exlusive upper bound for the checkpoint token. Only
+            events which have a checkpoint token smaller than this value
+            will get returned. The highest value will be <see cref="F:YasES.Core.CheckpointToken.Ending"/>.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.StreamIdentifier.SingleStream(System.String,System.String)">
+            <summary>
+            Creates a stream identifier which points to exactly one stream. The
+            stream is defined by <paramref name="streamId"/>. 
+            <paramref name="bucketId"/> and <paramref name="streamId"/> are case sensitive.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.StreamIdentifier.AllStreams(System.String)">
+            <summary>
+            Creates a stream identifier which points to all streams within the
+            defined <paramref name="bucketId"/>. <paramref name="bucketId"/> is case sensitive.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.StreamIdentifier.StreamsPrefixedWith(System.String,System.String)">
+            <summary>
+            Creates a stream identifier which points to all streams where each streamId
+            starts with the provided <paramref name="streamIdPrefix"/>. <paramref name="bucketId"/>
+            and <paramref name="streamIdPrefix"/> are case sensitive.
+            </summary>
+        </member>
         <member name="P:YasES.Core.StreamIdentifier.BucketId">
             <summary>
             The bucket name the stream lives in.
@@ -187,9 +270,20 @@
             is a wildcard identifier.
             </summary>
         </member>
+        <member name="P:YasES.Core.StreamIdentifier.StreamIdPrefix">
+            <summary>
+            The prefix to search for. Only use this property if <see cref="P:YasES.Core.StreamIdentifier.IsSingleStream"/>
+            and <see cref="P:YasES.Core.StreamIdentifier.MatchesAllStreams"/> return false.
+            </summary>
+        </member>
         <member name="P:YasES.Core.StreamIdentifier.MatchesAllStreams">
             <summary>
             Returns true if <see cref="P:YasES.Core.StreamIdentifier.StreamId"/> points to all streams, otherwise false.
+            </summary>
+        </member>
+        <member name="P:YasES.Core.StreamIdentifier.IsSingleStream">
+            <summary>
+            Returns true if is a single stream identifier, otherwise false.
             </summary>
         </member>
         <member name="F:YasES.Core.SystemClock.ResolveUtcNow">

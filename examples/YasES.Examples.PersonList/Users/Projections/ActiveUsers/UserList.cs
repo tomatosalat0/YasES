@@ -16,36 +16,36 @@ namespace YasES.Examples.PersonList.Users.Projections.ActiveUsers
         {
             _handler = new Dictionary<string, Action<IEventMessage>>()
             {
-                [UserCreatedEvent.Name] = HandleUserCreated,
-                [UserDeletedEvent.Name] = HandleUserDeleted,
-                [UserRenamedEvent.Name] = HandleUserRenamed,
+                [UserCreatedEvent.Name] = WhenUserCreated,
+                [UserDeletedEvent.Name] = WhenUserDeleted,
+                [UserRenamedEvent.Name] = WhenUserRenamed,
             };
             _read = read;
             _lastKnownEvent = CheckpointToken.Beginning;
         }
 
-        private void HandleUserDeleted(IEventMessage message)
+        private void WhenUserDeleted(IEventMessage message)
         {
             UserDeletedEvent.Parameter parameter = UserDeletedEvent.Deserialize(message);
             _users.RemoveAll(p => p.Id == parameter.UserId);
             LastUserListChangedDate = message.CreationDateUtc;
         }
 
-        private void HandleUserCreated(IEventMessage message)
+        private void WhenUserCreated(IEventMessage message)
         {
             User user = new User();
-            user.Handle(message);
+            user.When(message);
             _users.Add(user);
             LastUserListChangedDate = message.CreationDateUtc;
         }
 
-        private void HandleUserRenamed(IEventMessage message)
+        private void WhenUserRenamed(IEventMessage message)
         {
             UserRenamedEvent.Parameter parameter = UserRenamedEvent.Deserialize(message);
-            _users.FirstOrDefault(p => p.Id == parameter.UserId)?.Handle(message, parameter);
+            _users.FirstOrDefault(p => p.Id == parameter.UserId)?.When(message, parameter);
         }
 
-        private void Handle(IEventMessage message)
+        private void When(IEventMessage message)
         {
             if (_handler.TryGetValue(message.EventName, out var handler))
             {
@@ -56,7 +56,7 @@ namespace YasES.Examples.PersonList.Users.Projections.ActiveUsers
         public void Update()
         {
             ReadPredicate predicate = ReadPredicateBuilder.Custom()
-                .FromAllStreamsInBucket(UsersContext.Streams.Bucket)
+                .FromStream(StreamIdentifier.StreamsPrefixedWith(UsersContext.Streams.Bucket, UsersContext.Streams.UserStreamPrefix))
                 .ReadForwards()
                 .OnlyIncluding(UserCreatedEvent.Name, UserCreatedEvent.Name, UserDeletedEvent.Name)
                 .RaisedAfterCheckpoint(_lastKnownEvent)
@@ -64,7 +64,7 @@ namespace YasES.Examples.PersonList.Users.Projections.ActiveUsers
 
             foreach (var @event in _read.Read(predicate))
             {
-                Handle(@event);
+                When(@event);
                 _lastKnownEvent = @event.Checkpoint;
                 LastDetectedUpdate = @event.CreationDateUtc;
             }

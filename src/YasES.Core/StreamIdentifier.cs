@@ -7,23 +7,45 @@ namespace YasES.Core
         public static readonly string DefaultBucketId = "_default";
         private static readonly string StreamWildcard = "*";
 
-        private StreamIdentifier(string bucketId, string streamId)
+        private StreamIdentifier(string bucketId, string streamId, string streamIdPrefix)
         {
             BucketId = bucketId;
             StreamId = streamId;
+            StreamIdPrefix = streamIdPrefix;
         }
 
+        /// <summary>
+        /// Creates a stream identifier which points to exactly one stream. The
+        /// stream is defined by <paramref name="streamId"/>. 
+        /// <paramref name="bucketId"/> and <paramref name="streamId"/> are case sensitive.
+        /// </summary>
         public static StreamIdentifier SingleStream(string bucketId, string streamId)
         {
             EnsureValidBucketId(bucketId);
             EnsureValidStreamId(streamId);
-            return new StreamIdentifier(bucketId, streamId);
+            return new StreamIdentifier(bucketId, streamId, streamIdPrefix: string.Empty);
         }
 
+        /// <summary>
+        /// Creates a stream identifier which points to all streams within the
+        /// defined <paramref name="bucketId"/>. <paramref name="bucketId"/> is case sensitive.
+        /// </summary>
         public static StreamIdentifier AllStreams(string bucketId)
         {
             EnsureValidBucketId(bucketId);
-            return new StreamIdentifier(bucketId, StreamWildcard);
+            return new StreamIdentifier(bucketId, StreamWildcard, streamIdPrefix: string.Empty);
+        }
+
+        /// <summary>
+        /// Creates a stream identifier which points to all streams where each streamId
+        /// starts with the provided <paramref name="streamIdPrefix"/>. <paramref name="bucketId"/>
+        /// and <paramref name="streamIdPrefix"/> are case sensitive.
+        /// </summary>
+        public static StreamIdentifier StreamsPrefixedWith(string bucketId, string streamIdPrefix)
+        {
+            EnsureValidBucketId(bucketId);
+            EnsureValidStreamId(streamIdPrefix);
+            return new StreamIdentifier(bucketId, streamId: string.Empty, streamIdPrefix);
         }
 
         public static void EnsureValidBucketId(string bucketId)
@@ -57,13 +79,24 @@ namespace YasES.Core
         public string StreamId { get; }
 
         /// <summary>
+        /// The prefix to search for. Only use this property if <see cref="IsSingleStream"/>
+        /// and <see cref="MatchesAllStreams"/> return false.
+        /// </summary>
+        public string StreamIdPrefix { get; }
+
+        /// <summary>
         /// Returns true if <see cref="StreamId"/> points to all streams, otherwise false.
         /// </summary>
         public bool MatchesAllStreams => StreamId == StreamWildcard;
 
+        /// <summary>
+        /// Returns true if is a single stream identifier, otherwise false.
+        /// </summary>
+        public bool IsSingleStream => StreamId != StreamWildcard && StreamId != string.Empty;
+
         public bool Equals(StreamIdentifier other)
         {
-            return BucketId == other.BucketId && StreamId == other.StreamId;
+            return BucketId == other.BucketId && StreamId == other.StreamId && StreamIdPrefix == other.StreamIdPrefix;
         }
 
         public override bool Equals(object? obj)
@@ -75,12 +108,14 @@ namespace YasES.Core
 
         public override int GetHashCode()
         {
-            return BucketId.GetHashCode() ^ StreamId.GetHashCode();
+            return BucketId.GetHashCode() ^ StreamId.GetHashCode() ^ StreamIdPrefix.GetHashCode();
         }
 
         public override string ToString()
         {
-            return $"{BucketId}/{StreamId}";
+            if (IsSingleStream || MatchesAllStreams)
+                return $"{BucketId}/{StreamId}";
+            return $"{BucketId}/{StreamId}*";
         }
 
         public static bool operator ==(StreamIdentifier lhs, StreamIdentifier rhs) => lhs.Equals(rhs);

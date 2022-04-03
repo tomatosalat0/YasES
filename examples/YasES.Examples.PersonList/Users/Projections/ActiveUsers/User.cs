@@ -12,29 +12,29 @@ namespace YasES.Examples.PersonList.Users.Projections.ActiveUsers
         {
             _handler = new Dictionary<string, Action<IEventMessage>>()
             {
-                [UserCreatedEvent.Name] = HandleUserCreated,
-                [UserRenamedEvent.Name] = HandleUserNameChanged
+                [UserCreatedEvent.Name] = WhenUserCreated,
+                [UserRenamedEvent.Name] = WhenUserNameChanged
             };
         }
 
-        private void HandleUserNameChanged(IEventMessage message)
+        private void WhenUserNameChanged(IEventMessage message)
         {
             UserRenamedEvent.Parameter parameter = UserRenamedEvent.Deserialize(message);
-            Handle(message, parameter);
+            When(message, parameter);
         }
 
-        private void HandleUserCreated(IEventMessage message)
+        private void WhenUserCreated(IEventMessage message)
         {
             UserCreatedEvent.Parameter parameter = UserCreatedEvent.Deserialize(message);
-            Handle(message, parameter);
+            When(message, parameter);
         }
 
-        public void Handle(IEventMessage message)
+        public void When(IEventMessage message)
         {
             _handler[message.EventName](message);
         }
 
-        public void Handle(IEventMessage message, UserCreatedEvent.Parameter parameter)
+        public void When(IEventMessage message, UserCreatedEvent.Parameter parameter)
         {
             CreationDate = message.CreationDateUtc;
             LastModificationDate = message.CreationDateUtc;
@@ -42,7 +42,7 @@ namespace YasES.Examples.PersonList.Users.Projections.ActiveUsers
             Name = parameter.UserName;
         }
 
-        public void Handle(IEventMessage message, UserRenamedEvent.Parameter parameter)
+        public void When(IEventMessage message, UserRenamedEvent.Parameter parameter)
         {
             Name = parameter.NewUserName;
             LastModificationDate = message.CreationDateUtc;

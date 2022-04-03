@@ -39,14 +39,15 @@ namespace YasES.Core.Tests.UnitTests
         }
 
         [TestMethod]
-        public void CorrelationEventCollectorThrowsExceptionIfMessageContainsDifferentCorrelationId()
+        public void CorrelationEventCollectorDoesntAdjustExistingCorrelationId()
         {
             string correlationIdValue = "correlationValue";
 
             IEventCollector collector = new CorrelationEventCollector(correlationIdValue, new EventCollector());
-            Assert.ThrowsException<InvalidOperationException>(() =>
-                collector.Add(new EventMessage("MyEvent", new Dictionary<string, object>() { [CommonMetaData.CorrelationId] = "A different value" }, Memory<byte>.Empty))
-            );
+            collector.Add(new EventMessage("MyEvent", new Dictionary<string, object>() { [CommonMetaData.CorrelationId] = "A different value" }, Memory<byte>.Empty));
+            CommitAttempt commit = collector.BuildCommit(StreamIdentifier.SingleStream("bucket", "stream"));
+
+            Assert.AreEqual("A different value", commit.Messages[0].Headers[CommonMetaData.CorrelationId]);
         }
 
         [TestMethod]

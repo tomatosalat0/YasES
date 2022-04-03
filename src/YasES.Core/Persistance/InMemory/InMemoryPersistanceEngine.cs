@@ -15,7 +15,10 @@ namespace YasES.Persistance.InMemory
 
         public void Commit(CommitAttempt attempt)
         {
-            MessageListContainer container = OpenContainer(attempt.StreamIdentifier);
+            if (!attempt.StreamIdentifier.IsSingleStream)
+                throw new InvalidOperationException($"The stream identifier must point to a single stream");
+
+            MessageListContainer container = OpenContainer(attempt.StreamIdentifier)[0];
             lock(_commitLock)
             {
                 if (!_commitedIds.Add(attempt.CommitId))
@@ -32,8 +35,8 @@ namespace YasES.Persistance.InMemory
                 return Enumerable.Empty<IReadEventMessage>();
 
             IEnumerable<IReadEventMessage> messages = predicate.Reverse
-                ? iterator.Backward(predicate.LowerBound, predicate.UpperBound)
-                : iterator.Forward(predicate.LowerBound, predicate.UpperBound);
+                ? iterator.Backward(predicate.LowerExclusiveBound, predicate.UpperExclusiveBound)
+                : iterator.Forward(predicate.LowerExclusiveBound, predicate.UpperExclusiveBound);
 
             if (predicate.EventNamesFilter != null)
             {
@@ -71,11 +74,11 @@ namespace YasES.Persistance.InMemory
 
             lock(_streamsLock)
             {
-                return identifiers.Distinct().Select(OpenContainerUnlocked).ToList();
+                return identifiers.Distinct().SelectMany(OpenContainerUnlocked).Distinct().ToList();
             }
         }
 
-        private MessageListContainer OpenContainer(StreamIdentifier identifier)
+        private List<MessageListContainer> OpenContainer(StreamIdentifier identifier)
         {
             lock(_streamsLock)
             {
@@ -83,14 +86,26 @@ namespace YasES.Persistance.InMemory
             }
         }
 
-        private MessageListContainer OpenContainerUnlocked(StreamIdentifier identifier)
+        private List<MessageListContainer> OpenContainerUnlocked(StreamIdentifier identifier)
         {
-            if (!_streams.TryGetValue(identifier, out MessageListContainer? container))
+            List<MessageListContainer> result = new List<MessageListContainer>();
+            if (identifier.IsSingleStream)
             {
-                container = new MessageListContainer(identifier);
-                _streams.Add(identifier, container);
+                if (!_streams.TryGetValue(identifier, out MessageListContainer? container))
+                {
+                    container = new MessageListContainer(identifier);
+                    _streams.Add(identifier, container);
+                }
+                result.Add(container);
+            } else
+            {
+                result.AddRange(_streams
+                    .Where(p => p.Key.BucketId == identifier.BucketId)
+                    .Where(p => p.Key.StreamId.StartsWith(identifier.StreamIdPrefix, StringComparison.Ordinal))
+                    .Select(p => p.Value)
+                );
             }
-            return container;
+            return result;
         }
     }
 }

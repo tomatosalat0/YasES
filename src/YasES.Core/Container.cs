@@ -33,6 +33,14 @@ namespace YasES.Core
             return result;
         }
 
+        public object Resolve(Type serviceType)
+        {
+            ThrowDisposed();
+            if (!TryResolve(serviceType, out object? result))
+                throw new InvalidOperationException($"The required service for '{serviceType.Name}' could be found");
+            return result;
+        }
+
         public TService? ResolveOrDefault<TService>(TService? @default = default)
         {
             ThrowDisposed();
@@ -41,16 +49,35 @@ namespace YasES.Core
             return result;
         }
 
+        public object? ResolveOrDefault(Type serviceType, object? @default = default)
+        {
+            ThrowDisposed();
+            if (!TryResolve(serviceType, out object? result))
+                return @default;
+            return result;
+        }
+
         private bool TryResolve<TService>([NotNullWhen(true)] out TService? result)
         {
-            if (!_registrations.TryGetValue(typeof(TService), out Registration? registration))
-                registration = GetCompatibleAttributes(typeof(TService)).FirstOrDefault();
+            if (TryResolve(typeof(TService), out object? service) && service != null)
+            {
+                result = (TService)service;
+                return true;
+            }
+            result = default;
+            return false;
+        }
+
+        private bool TryResolve(Type serviceType, [NotNullWhen(true)] out object? result)
+        {
+            if (!_registrations.TryGetValue(serviceType, out Registration? registration))
+                registration = GetCompatibleAttributes(serviceType).FirstOrDefault();
 
             result = default;
             if (registration != null)
             {
-                result = registration.Resolve<TService>();
-            }            
+                result = registration.Resolve();
+            }
             return result != null;
         }
 
@@ -87,7 +114,7 @@ namespace YasES.Core
                 _factory = factory;
             }
 
-            public TService? Resolve<TService>()
+            public object? Resolve()
             {
                 if (_instance == null)
                 {
@@ -101,7 +128,12 @@ namespace YasES.Core
                         _factory = null;
                     }
                 }
-                return (TService?)_instance;
+                return _instance;
+            }
+
+            public TService? Resolve<TService>()
+            {
+                return (TService?)Resolve();
             }
 
             internal void DisposeInstance()

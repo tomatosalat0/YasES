@@ -2,7 +2,7 @@
 {
     public static class CommonMetaData
     {
-        public const string MessageId = "$id";
+        public const string EventId = "$id";
 
         public const string CorrelationId = "$correlationId";
 
