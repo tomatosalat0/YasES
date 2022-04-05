@@ -2,7 +2,7 @@
 
 namespace YasES.Core
 {
-    public interface IReadEventMessage : IEventMessage
+    public interface IStoredEventMessage : IEventMessage
     {
         /// <summary>
         /// The checkpoint token within the persistance store.

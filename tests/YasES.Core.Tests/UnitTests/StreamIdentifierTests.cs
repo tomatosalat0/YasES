@@ -99,5 +99,44 @@ namespace YasES.Core.Tests.UnitTests
             Assert.AreEqual("bucket1/stream1", StreamIdentifier.SingleStream("bucket1", "stream1").ToString());
             Assert.AreEqual("bucket1/*", StreamIdentifier.AllStreams("bucket1").ToString());
         }
+
+        [TestMethod]
+        public void StreamIdentifierMatchesSingleStream()
+        {
+            StreamIdentifier lhs = StreamIdentifier.SingleStream("bucket1", "stream1");
+            Assert.IsTrue(lhs.Matches(StreamIdentifier.SingleStream("bucket1", "stream1")));
+            Assert.IsFalse(lhs.Matches(StreamIdentifier.SingleStream("bucket1", "stream12")));
+            Assert.IsFalse(lhs.Matches(StreamIdentifier.SingleStream("bucket2", "stream1")));
+            Assert.IsFalse(lhs.Matches(StreamIdentifier.SingleStream("bucket1", "Stream1")));
+        }
+
+        [TestMethod]
+        public void StreamIdentifierMatchesAllStreamsInSameBucket()
+        {
+            StreamIdentifier lhs = StreamIdentifier.AllStreams("bucket1");
+            Assert.IsTrue(lhs.Matches(StreamIdentifier.SingleStream("bucket1", "stream1")));
+            Assert.IsTrue(lhs.Matches(StreamIdentifier.SingleStream("bucket1", "stream12")));
+            Assert.IsFalse(lhs.Matches(StreamIdentifier.SingleStream("bucket2", "stream1")));
+            Assert.IsTrue(lhs.Matches(StreamIdentifier.SingleStream("bucket1", "Stream1")));
+        }
+
+        [TestMethod]
+        public void StreamIdentifierMatchesPrefix()
+        {
+            StreamIdentifier lhs = StreamIdentifier.StreamsPrefixedWith("bucket1", "stream");
+            Assert.IsTrue(lhs.Matches(StreamIdentifier.SingleStream("bucket1", "stream1")));
+            Assert.IsTrue(lhs.Matches(StreamIdentifier.SingleStream("bucket1", "stream12")));
+            Assert.IsFalse(lhs.Matches(StreamIdentifier.SingleStream("bucket2", "stream1")));
+            Assert.IsFalse(lhs.Matches(StreamIdentifier.SingleStream("bucket1", "Stream1")));
+        }
+
+        [TestMethod]
+        public void StreamIdentifierReturnsFalseIfOtherIsNotASingleStream()
+        {
+            StreamIdentifier lhs = StreamIdentifier.StreamsPrefixedWith("bucket1", "stream");
+            Assert.IsFalse(lhs.Matches(StreamIdentifier.StreamsPrefixedWith("bucket1", "stream")));
+            Assert.IsFalse(lhs.Matches(StreamIdentifier.StreamsPrefixedWith("bucket1", "stream1")));
+            Assert.IsFalse(lhs.Matches(StreamIdentifier.AllStreams("bucket1")));
+        }
     }
 }

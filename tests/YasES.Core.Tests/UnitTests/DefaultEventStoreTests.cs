@@ -11,7 +11,7 @@ namespace YasES.Core.Tests.UnitTests
         public void DefaultEventStoreUsesContainerData()
         {
             IEventReadWrite storage = new TestEventReadWrite();
-            IEventStore eventStore = Wireup.Init()
+            IEventStore eventStore = EventStoreBuilder.Init()
                 .ConfigureContainer((container) =>
                 {
                     container.Register<IEventReadWrite>(storage);
@@ -26,7 +26,7 @@ namespace YasES.Core.Tests.UnitTests
         {
             DisposeTrack tracker = new DisposeTrack();
             IEventReadWrite storage = new TestEventReadWrite();
-            IEventStore eventStore = Wireup.Init()
+            IEventStore eventStore = EventStoreBuilder.Init()
                 .ConfigureContainer((container) =>
                 {
                     container.Register<DisposeTrack>(tracker);
@@ -45,7 +45,7 @@ namespace YasES.Core.Tests.UnitTests
                 throw new NotImplementedException();
             }
 
-            public IEnumerable<IReadEventMessage> Read(ReadPredicate predicate)
+            public IEnumerable<IStoredEventMessage> Read(ReadPredicate predicate)
             {
                 throw new NotImplementedException();
             }

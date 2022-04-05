@@ -2,9 +2,9 @@
 
 namespace YasES.Core
 {
-    public static class WireupMemoryPersistanceExtensions
+    public static class EventStoreBuilderMemoryPersistanceExtensions
     {
-        public static Wireup UseInMemoryPersistance(this Wireup wireup)
+        public static EventStoreBuilder UseInMemoryPersistance(this EventStoreBuilder wireup)
         {
             return wireup.ConfigureContainer((container) => 
             {

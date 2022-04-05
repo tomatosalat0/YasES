@@ -78,7 +78,7 @@ namespace YasES.Persistance.Sqlite.Tests.UnitTests
             SqlitePersistanceEngine engine = new SqlitePersistanceEngine(factory);
             engine.Initialize();
 
-            List<IReadEventMessage> messages = engine.Read(ReadPredicateBuilder.Forwards(StreamIdentifier.SingleStream("bucket", "stream"))).ToList();
+            List<IStoredEventMessage> messages = engine.Read(ReadPredicateBuilder.Forwards(StreamIdentifier.SingleStream("bucket", "stream"))).ToList();
             Assert.AreEqual(0, messages.Count);
         }
 
@@ -99,7 +99,7 @@ namespace YasES.Persistance.Sqlite.Tests.UnitTests
             );
             engine.Commit(commit);
 
-            List<IReadEventMessage> messages = engine.Read(ReadPredicateBuilder.Forwards(StreamIdentifier.SingleStream("bucket", "stream"))).ToList();
+            List<IStoredEventMessage> messages = engine.Read(ReadPredicateBuilder.Forwards(StreamIdentifier.SingleStream("bucket", "stream"))).ToList();
             Assert.AreEqual(1, messages.Count);
             Assert.AreEqual("Event", messages[0].EventName);
             Assert.AreEqual(identifier, messages[0].StreamIdentifier);
@@ -128,7 +128,7 @@ namespace YasES.Persistance.Sqlite.Tests.UnitTests
             );
             engine.Commit(commit);
 
-            List<IReadEventMessage> messages = engine.Read(ReadPredicateBuilder.Forwards(identifier)).ToList();
+            List<IStoredEventMessage> messages = engine.Read(ReadPredicateBuilder.Forwards(identifier)).ToList();
             Assert.AreEqual(2000, messages.Count);
             Assert.AreEqual(0, Convert.ToInt32(messages[0].Headers["index"]));
             Assert.AreEqual(1999, Convert.ToInt32(messages.Last().Headers["index"]));
@@ -156,7 +156,7 @@ namespace YasES.Persistance.Sqlite.Tests.UnitTests
             );
             engine.Commit(commit);
 
-            List<IReadEventMessage> messages = engine.Read(ReadPredicateBuilder.Forwards(identifier)).ToList();
+            List<IStoredEventMessage> messages = engine.Read(ReadPredicateBuilder.Forwards(identifier)).ToList();
             Assert.AreEqual(1, pool.GetReadyConnections());
         }
 
@@ -182,7 +182,7 @@ namespace YasES.Persistance.Sqlite.Tests.UnitTests
             );
             engine.Commit(commit);
 
-            List<IReadEventMessage> messages = engine.Read(ReadPredicateBuilder.Backwards(identifier)).ToList();
+            List<IStoredEventMessage> messages = engine.Read(ReadPredicateBuilder.Backwards(identifier)).ToList();
             Assert.AreEqual(2000, messages.Count);
             Assert.AreEqual(1999, Convert.ToInt32(messages[0].Headers["index"]));
             Assert.AreEqual(0, Convert.ToInt32(messages.Last().Headers["index"]));
@@ -216,7 +216,7 @@ namespace YasES.Persistance.Sqlite.Tests.UnitTests
                 .OnlyIncluding(new HashSet<string>() { "Event0", "Event1" })
                 .WithoutCheckpointLimit()
                 .Build();
-            List<IReadEventMessage> messages = engine.Read(predicate).ToList();
+            List<IStoredEventMessage> messages = engine.Read(predicate).ToList();
             Assert.AreEqual(20, messages.Count);
             Assert.AreEqual(0, Convert.ToInt32(messages[0].Headers["index"]));
         }
@@ -249,7 +249,7 @@ namespace YasES.Persistance.Sqlite.Tests.UnitTests
                 .AllExcluding(new HashSet<string>() { "Event0", "Event1" })
                 .WithoutCheckpointLimit()
                 .Build();
-            List<IReadEventMessage> messages = engine.Read(predicate).ToList();
+            List<IStoredEventMessage> messages = engine.Read(predicate).ToList();
             Assert.AreEqual(80, messages.Count);
             Assert.AreEqual(2, Convert.ToInt32(messages[0].Headers["index"]));
         }
@@ -283,7 +283,7 @@ namespace YasES.Persistance.Sqlite.Tests.UnitTests
                 new[] { new EventMessage("Event3", Memory<byte>.Empty) }
             ));
 
-            List<IReadEventMessage> messages = engine.Read(ReadPredicateBuilder.Forwards(stream1)).ToList();
+            List<IStoredEventMessage> messages = engine.Read(ReadPredicateBuilder.Forwards(stream1)).ToList();
             Assert.AreEqual(1, messages.Count);
         }
 
@@ -316,7 +316,7 @@ namespace YasES.Persistance.Sqlite.Tests.UnitTests
                 new[] { new EventMessage("Event3", Memory<byte>.Empty) }
             ));
 
-            List<IReadEventMessage> messages = engine.Read(ReadPredicateBuilder.Forwards(stream1, stream2)).ToList();
+            List<IStoredEventMessage> messages = engine.Read(ReadPredicateBuilder.Forwards(stream1, stream2)).ToList();
             Assert.AreEqual(2, messages.Count);
         }
 
@@ -350,7 +350,7 @@ namespace YasES.Persistance.Sqlite.Tests.UnitTests
                 new[] { new EventMessage("Event3", Memory<byte>.Empty) }
             ));
 
-            List<IReadEventMessage> messages = engine.Read(ReadPredicateBuilder.Forwards(StreamIdentifier.AllStreams("bucket1"))).ToList();
+            List<IStoredEventMessage> messages = engine.Read(ReadPredicateBuilder.Forwards(StreamIdentifier.AllStreams("bucket1"))).ToList();
             Assert.AreEqual(2, messages.Count);
         }
 
@@ -395,7 +395,7 @@ namespace YasES.Persistance.Sqlite.Tests.UnitTests
                 new[] { new EventMessage("Event2", Memory<byte>.Empty) }
             ));
 
-            List<IReadEventMessage> messages = engine.Read(ReadPredicateBuilder.Forwards(stream1)).ToList();
+            List<IStoredEventMessage> messages = engine.Read(ReadPredicateBuilder.Forwards(stream1)).ToList();
             Assert.AreEqual(1, messages.Count);
         }
 
@@ -421,7 +421,7 @@ namespace YasES.Persistance.Sqlite.Tests.UnitTests
                 .HavingTheCorrelationId(correlationId)
                 .Build();
 
-            List<IReadEventMessage> read = engine.Read(predicate).ToList();
+            List<IStoredEventMessage> read = engine.Read(predicate).ToList();
             Assert.AreEqual(1, read.Count);
             Assert.AreEqual(correlationId, read[0].Headers[CommonMetaData.CorrelationId]);
         }
@@ -470,7 +470,7 @@ namespace YasES.Persistance.Sqlite.Tests.UnitTests
             engine.Commit(new EventCollector().Add(new EventMessage("event5", Memory<byte>.Empty)).BuildCommit(StreamIdentifier.SingleStream("different", "A/stream5")));
 
             var predicate = ReadPredicateBuilder.Forwards(StreamIdentifier.StreamsPrefixedWith("bucket", "A/"));
-            List<IReadEventMessage> read = engine.Read(predicate).ToList();
+            List<IStoredEventMessage> read = engine.Read(predicate).ToList();
             Assert.AreEqual(2, read.Count);
             Assert.AreEqual("A/stream1", read[0].StreamIdentifier.StreamId);
             Assert.AreEqual("A/stream2", read[1].StreamIdentifier.StreamId);
@@ -491,7 +491,7 @@ namespace YasES.Persistance.Sqlite.Tests.UnitTests
             engine.Commit(new EventCollector().Add(new EventMessage("event5", Memory<byte>.Empty)).BuildCommit(StreamIdentifier.SingleStream("different", "A/stream5")));
 
             var predicate = ReadPredicateBuilder.Forwards(StreamIdentifier.StreamsPrefixedWith("bucket", "A/"), StreamIdentifier.SingleStream("bucket", "a/stream4"));
-            List<IReadEventMessage> read = engine.Read(predicate).ToList();
+            List<IStoredEventMessage> read = engine.Read(predicate).ToList();
             Assert.AreEqual(3, read.Count);
             Assert.AreEqual("A/stream1", read[0].StreamIdentifier.StreamId);
             Assert.AreEqual("A/stream2", read[1].StreamIdentifier.StreamId);
@@ -511,7 +511,7 @@ namespace YasES.Persistance.Sqlite.Tests.UnitTests
             engine.Commit(new EventCollector().Add(new EventMessage("event1", Memory<byte>.Empty)).BuildCommit(StreamIdentifier.SingleStream("bucket", "AhstreamNgroup/stream1")));
 
             var predicate = ReadPredicateBuilder.Forwards(StreamIdentifier.StreamsPrefixedWith("bucket", "A%stream_group"));
-            List<IReadEventMessage> read = engine.Read(predicate).ToList();
+            List<IStoredEventMessage> read = engine.Read(predicate).ToList();
             Assert.AreEqual(1, read.Count);
         }
     }

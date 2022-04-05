@@ -92,7 +92,7 @@ namespace YasES.Examples.PersonList.Users
                 .WithoutCheckpointLimit()
                 .Build();
 
-            IReadEventMessage? @event = _eventStore.Read(predicate)
+            IStoredEventMessage? @event = _eventStore.Read(predicate)
                 .Where(p => ChangedToName(p, userName))
                 .FirstOrDefault();
 
@@ -121,7 +121,7 @@ namespace YasES.Examples.PersonList.Users
                 .WithoutCheckpointLimit()
                 .Build();
 
-            IReadEventMessage? @event = _eventStore.Read(predicate)
+            IStoredEventMessage? @event = _eventStore.Read(predicate)
                 .FirstOrDefault();
 
             return @event?.CreationDateUtc;
@@ -136,7 +136,7 @@ namespace YasES.Examples.PersonList.Users
                 .WithoutCheckpointLimit()
                 .Build();
 
-            IReadEventMessage? @event = _eventStore.Read(predicate)
+            IStoredEventMessage? @event = _eventStore.Read(predicate)
                 .Where(p => p.EventName != UserDeletedEvent.Name)
                 .FirstOrDefault();
 

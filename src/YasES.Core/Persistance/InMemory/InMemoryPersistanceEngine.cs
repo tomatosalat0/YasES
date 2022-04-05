@@ -28,13 +28,13 @@ namespace YasES.Persistance.InMemory
             }
         }
 
-        public IEnumerable<IReadEventMessage> Read(ReadPredicate predicate)
+        public IEnumerable<IStoredEventMessage> Read(ReadPredicate predicate)
         {
             MessageListIterator? iterator = PrepareIterator(predicate.Streams);
             if (iterator == null)
-                return Enumerable.Empty<IReadEventMessage>();
+                return Enumerable.Empty<IStoredEventMessage>();
 
-            IEnumerable<IReadEventMessage> messages = predicate.Reverse
+            IEnumerable<IStoredEventMessage> messages = predicate.Reverse
                 ? iterator.Backward(predicate.LowerExclusiveBound, predicate.UpperExclusiveBound)
                 : iterator.Forward(predicate.LowerExclusiveBound, predicate.UpperExclusiveBound);
 

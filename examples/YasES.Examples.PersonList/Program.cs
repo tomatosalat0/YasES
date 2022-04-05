@@ -13,7 +13,7 @@ namespace YasES.Examples.PersonList
 
         static void Main(string[] args)
         {
-            using IEventStore eventStore = Wireup.Init()
+            using IEventStore eventStore = EventStoreBuilder.Init()
                 .UseInMemoryPersistance()
                 //.UseSqlitePersistance("DataSource=./users.sqlite")
                 .Build();

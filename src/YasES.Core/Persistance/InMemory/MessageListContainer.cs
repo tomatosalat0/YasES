@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using YasES.Core;
 
@@ -7,7 +8,7 @@ namespace YasES.Persistance.InMemory
 {
     internal class MessageListContainer
     {
-        private readonly List<IReadEventMessage> _messages = new List<IReadEventMessage>();
+        private readonly List<IStoredEventMessage> _messages = new List<IStoredEventMessage>();
         private readonly object _messagesLock = new object();
 
         public MessageListContainer(StreamIdentifier identifier)
@@ -33,7 +34,7 @@ namespace YasES.Persistance.InMemory
             return nextSequenceId;
         }
 
-        internal IReadOnlyList<IReadEventMessage> CreateSnapshot(Func<IReadEventMessage, bool> predicate)
+        internal IReadOnlyList<IStoredEventMessage> CreateSnapshot(Func<IStoredEventMessage, bool> predicate)
         {
             lock(_messagesLock)
             {
@@ -41,7 +42,8 @@ namespace YasES.Persistance.InMemory
             }
         }
 
-        private class MemoryReadMessage : IReadEventMessage
+        [DebuggerDisplay("{EventName} ({CreationDateUtc})")]
+        private class MemoryReadMessage : IStoredEventMessage
         {
             private readonly IEventMessage _message;
 

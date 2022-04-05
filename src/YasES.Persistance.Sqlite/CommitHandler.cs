@@ -8,13 +8,44 @@ namespace YasES.Persistance.Sqlite
 {
     internal class CommitHandler
     {
+        private const string InsertStatement =
+@"INSERT INTO '{{TableName}}' (
+    BucketId,
+    StreamId,
+    CommitId,
+    CommitMessageIndex,
+    CommitCreationDate,
+    EventCreationDate,
+    EventName,
+    MessageId,
+	CorrelationId,
+	CausationId,
+    Headers,
+    Payload)
+VALUES (
+    @BucketId,
+    @StreamId,
+    @CommitId,
+    @CommitMessageIndex,
+    @CommitCreationDate,
+    @EventCreationDate,
+    @EventName,
+    @MessageId,
+	@CorrelationId,
+	@CausationId,
+    @Headers,
+    @Payload
+);";
+
         private readonly IDbConnection _connection;
         private readonly IDbTransaction _transaction;
+        private readonly SqliteConfiguration _configuration;
 
-        public CommitHandler(IDbConnection connection, IDbTransaction transaction)
+        public CommitHandler(IDbConnection connection, IDbTransaction transaction, SqliteConfiguration configuration)
         {
             _connection = connection;
             _transaction = transaction;
+            _configuration = configuration;
         }
 
         public void Commit(CommitAttempt commit)
@@ -68,7 +99,7 @@ namespace YasES.Persistance.Sqlite
         private void PrepareCommand(IDbCommand command)
         {
             command.Transaction = _transaction;
-            command.CommandText = InsertStatement;
+            command.CommandText = InsertStatement.Replace("{{TableName}}", _configuration.TableName);
         }
 
         private void InsertEvents(IDbCommand command, CommitAttempt commit)
@@ -76,7 +107,7 @@ namespace YasES.Persistance.Sqlite
             IDbDataParameter bucketId = DefineParameter(command, "@BucketId", DbType.String );
             IDbDataParameter streamId = DefineParameter(command, "@StreamId", DbType.String );
             IDbDataParameter commitId = DefineParameter(command, "@CommitId", DbType.StringFixedLength );
-            IDbDataParameter CommitMessageIndex = DefineParameter(command, "@CommitMessageIndex", DbType.Int64);
+            IDbDataParameter commitMessageIndex = DefineParameter(command, "@CommitMessageIndex", DbType.Int64);
             IDbDataParameter commitCreationDate = DefineParameter(command, "@CommitCreationDate", DbType.DateTime );
             IDbDataParameter eventCreationDate = DefineParameter(command, "@EventCreationDate", DbType.DateTime );
             IDbDataParameter eventName = DefineParameter(command, "@EventName", DbType.String );
@@ -102,7 +133,7 @@ namespace YasES.Persistance.Sqlite
                 eventName.Value = message.EventName;
                 headers.Value = HeaderSerialization.HeaderToJson(message);
                 payload.Value = message.Payload.ToArray();
-                CommitMessageIndex.Value = index++;
+                commitMessageIndex.Value = index++;
 
                 command.ExecuteNonQuery();
             }
@@ -116,34 +147,5 @@ namespace YasES.Persistance.Sqlite
             command.Parameters.Add(parameter);
             return parameter;
         }
-
-        private const string InsertStatement =
-@"INSERT INTO Events (
-    BucketId,
-    StreamId,
-    CommitId,
-    CommitMessageIndex,
-    CommitCreationDate,
-    EventCreationDate,
-    EventName,
-    MessageId,
-	CorrelationId,
-	CausationId,
-    Headers,
-    Payload)
-VALUES (
-    @BucketId,
-    @StreamId,
-    @CommitId,
-    @CommitMessageIndex,
-    @CommitCreationDate,
-    @EventCreationDate,
-    @EventName,
-    @MessageId,
-	@CorrelationId,
-	@CausationId,
-    @Headers,
-    @Payload
-);";
     }
 }

@@ -7,7 +7,7 @@ namespace YasES.Examples.Simple
     {
         static void Main(string[] args)
         {
-            IEventStore eventStore = Wireup.Init()
+            IEventStore eventStore = EventStoreBuilder.Init()
                 .UseInMemoryPersistance()
                 .Build();
 

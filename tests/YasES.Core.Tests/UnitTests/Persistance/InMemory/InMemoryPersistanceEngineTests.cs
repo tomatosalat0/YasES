@@ -39,7 +39,7 @@ namespace YasES.Core.Tests.UnitTests.Persistance.InMemory
                 new[] { @event }
             ));
 
-            IReadEventMessage received = engine.Read(ReadPredicateBuilder.Forwards(stream)).Single();
+            IStoredEventMessage received = engine.Read(ReadPredicateBuilder.Forwards(stream)).Single();
             Assert.AreEqual(@event.EventName, received.EventName);
             Assert.AreEqual(commitId, received.CommitId);
             Assert.AreEqual(new CheckpointToken(1), received.Checkpoint);
@@ -64,7 +64,7 @@ namespace YasES.Core.Tests.UnitTests.Persistance.InMemory
                 new[] { event1, event2 }
             ));
 
-            List<IReadEventMessage> received = engine.Read(ReadPredicateBuilder.Forwards(stream)).ToList();
+            List<IStoredEventMessage> received = engine.Read(ReadPredicateBuilder.Forwards(stream)).ToList();
             Assert.AreEqual(2, received.Count);
 
             Assert.AreEqual(event1.EventName, received[0].EventName);
@@ -97,7 +97,7 @@ namespace YasES.Core.Tests.UnitTests.Persistance.InMemory
             engine.Commit(commit2);
             engine.Commit(commit3);
 
-            List<IReadEventMessage> received = engine.Read(ReadPredicateBuilder.Forwards(stream1, stream2)).ToList();
+            List<IStoredEventMessage> received = engine.Read(ReadPredicateBuilder.Forwards(stream1, stream2)).ToList();
             Assert.AreEqual(3, received.Count);
 
             Assert.AreEqual(event1.EventName, received[0].EventName);
@@ -116,7 +116,7 @@ namespace YasES.Core.Tests.UnitTests.Persistance.InMemory
             IEventReadWrite engine = new InMemoryPersistanceEngine();
             engine.Commit(commit);
 
-            List<IReadEventMessage> messages = engine.Read(
+            List<IStoredEventMessage> messages = engine.Read(
                 ReadPredicateBuilder.Custom().FromAllStreamsInBucket("test").ReadForwards().OnlyIncluding("MyEvent1", "MyEvent2").WithoutCheckpointLimit().Build()
             ).ToList();
 
@@ -134,7 +134,7 @@ namespace YasES.Core.Tests.UnitTests.Persistance.InMemory
             IEventReadWrite engine = new InMemoryPersistanceEngine();
             engine.Commit(commit);
 
-            List<IReadEventMessage> messages = engine.Read(
+            List<IStoredEventMessage> messages = engine.Read(
                 ReadPredicateBuilder.Custom().FromAllStreamsInBucket("test").ReadForwards().AllExcluding("MyEvent1", "MyEvent2").WithoutCheckpointLimit().Build()
             ).ToList();
 
@@ -151,7 +151,7 @@ namespace YasES.Core.Tests.UnitTests.Persistance.InMemory
 
             engine.Commit(commit1);
 
-            List<IReadEventMessage> received = engine.Read(ReadPredicateBuilder.Forwards(stream1, stream1)).ToList();
+            List<IStoredEventMessage> received = engine.Read(ReadPredicateBuilder.Forwards(stream1, stream1)).ToList();
             Assert.AreEqual(1, received.Count);
         }
 
@@ -167,7 +167,7 @@ namespace YasES.Core.Tests.UnitTests.Persistance.InMemory
             engine.Commit(commit1);
             engine.Commit(commit1);
 
-            List<IReadEventMessage> received = engine.Read(ReadPredicateBuilder.Forwards(stream1)).ToList();
+            List<IStoredEventMessage> received = engine.Read(ReadPredicateBuilder.Forwards(stream1)).ToList();
             Assert.AreEqual(1, received.Count);
         }
 
@@ -188,7 +188,7 @@ namespace YasES.Core.Tests.UnitTests.Persistance.InMemory
             engine.Commit(commit2);
             engine.Commit(commit3);
 
-            List<IReadEventMessage> received = engine.Read(ReadPredicateBuilder.Backwards(stream2, stream1)).ToList();
+            List<IStoredEventMessage> received = engine.Read(ReadPredicateBuilder.Backwards(stream2, stream1)).ToList();
             Assert.AreEqual(3, received.Count);
 
             Assert.AreEqual(event3.EventName, received[0].EventName);
@@ -224,7 +224,7 @@ namespace YasES.Core.Tests.UnitTests.Persistance.InMemory
             IEventReadWrite engine = new InMemoryPersistanceEngine();
 
             engine.Commit(stream1, new EventMessage("MyEvent1", Memory<byte>.Empty));
-            IEnumerable<IReadEventMessage> read = engine.Read(ReadPredicateBuilder.Forwards(stream1));
+            IEnumerable<IStoredEventMessage> read = engine.Read(ReadPredicateBuilder.Forwards(stream1));
             engine.Commit(stream1, new EventMessage("MyEvent2", Memory<byte>.Empty));
 
             Assert.AreEqual(1, read.Count());
@@ -247,7 +247,7 @@ namespace YasES.Core.Tests.UnitTests.Persistance.InMemory
                 .HavingTheCorrelationId(correlationId)
                 .Build();
 
-            List<IReadEventMessage> read = engine.Read(predicate).ToList();
+            List<IStoredEventMessage> read = engine.Read(predicate).ToList();
             Assert.AreEqual(1, read.Count);
             Assert.AreEqual(correlationId, read[0].Headers[CommonMetaData.CorrelationId]);
         }
@@ -263,7 +263,7 @@ namespace YasES.Core.Tests.UnitTests.Persistance.InMemory
             engine.Commit(new EventCollector().Add(new EventMessage("event5", Memory<byte>.Empty)).BuildCommit(StreamIdentifier.SingleStream("different", "A/stream5")));
 
             var predicate = ReadPredicateBuilder.Forwards(StreamIdentifier.StreamsPrefixedWith("bucket", "A/"));
-            List<IReadEventMessage> read = engine.Read(predicate).ToList();
+            List<IStoredEventMessage> read = engine.Read(predicate).ToList();
             Assert.AreEqual(2, read.Count);
             Assert.AreEqual("A/stream1", read[0].StreamIdentifier.StreamId);
             Assert.AreEqual("A/stream2", read[1].StreamIdentifier.StreamId);

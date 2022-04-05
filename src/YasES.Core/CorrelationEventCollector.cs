@@ -26,7 +26,8 @@ namespace YasES.Core
 
         public IEventCollector Add(IEnumerable<IEventMessage> messages)
         {
-            return _inner.Add(messages.Select(Decorate));
+            _inner.Add(messages.Select(Decorate));
+            return this;
         }
 
         public CommitAttempt BuildCommit(StreamIdentifier stream, CommitId commitId)

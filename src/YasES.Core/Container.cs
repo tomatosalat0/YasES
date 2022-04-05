@@ -8,7 +8,17 @@ namespace YasES.Core
     public class Container : IDisposable
     {
         private readonly Dictionary<Type, Registration> _registrations = new Dictionary<Type, Registration>();
+        private readonly bool _ownsServices;
         private bool _disposedValue;
+
+        public Container() : this(true)
+        {
+        }
+
+        public Container(bool ownsServices)
+        {
+            _ownsServices = ownsServices;
+        }
 
         public Container Register<TService, TDependsOn>(Func<Container, TDependsOn, TService> factory)
         {
@@ -29,7 +39,7 @@ namespace YasES.Core
         {
             ThrowDisposed();
             if (!TryResolve(out TService? result))
-                throw new InvalidOperationException($"The required service for '{nameof(TService)}' could be found");
+                throw new InvalidOperationException($"The required service for '{typeof(TService)}' could be found");
             return result;
         }
 
@@ -149,7 +159,8 @@ namespace YasES.Core
             {
                 if (disposing)
                 {
-                    DisposeInstances();
+                    if (_ownsServices)
+                        DisposeInstances();
                 }
                 _disposedValue = true;
             }

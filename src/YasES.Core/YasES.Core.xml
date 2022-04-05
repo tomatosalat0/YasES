@@ -161,22 +161,22 @@
             Saves the provided <paramref name="attempt"/> to the persistant store.
             </summary>
         </member>
-        <member name="P:YasES.Core.IReadEventMessage.Checkpoint">
+        <member name="P:YasES.Core.IStoredEventMessage.Checkpoint">
             <summary>
             The checkpoint token within the persistance store.
             </summary>
         </member>
-        <member name="P:YasES.Core.IReadEventMessage.CommitId">
+        <member name="P:YasES.Core.IStoredEventMessage.CommitId">
             <summary>
             The id of the commit this message has been added to the persistance store.
             </summary>
         </member>
-        <member name="P:YasES.Core.IReadEventMessage.StreamIdentifier">
+        <member name="P:YasES.Core.IStoredEventMessage.StreamIdentifier">
             <summary>
             Gets the stream identifier this message belongs to.
             </summary>
         </member>
-        <member name="P:YasES.Core.IReadEventMessage.CommitTimeUtc">
+        <member name="P:YasES.Core.IStoredEventMessage.CommitTimeUtc">
             <summary>
             The date+time value the message has been commited to the persistance store.
             </summary>
@@ -284,6 +284,11 @@
         <member name="P:YasES.Core.StreamIdentifier.IsSingleStream">
             <summary>
             Returns true if is a single stream identifier, otherwise false.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.StreamIdentifier.Matches(YasES.Core.StreamIdentifier)">
+            <summary>
+            Returns true if the current identifier matches <paramref name="other"/>.
             </summary>
         </member>
         <member name="F:YasES.Core.SystemClock.ResolveUtcNow">

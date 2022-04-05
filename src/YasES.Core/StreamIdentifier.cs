@@ -65,6 +65,7 @@ namespace YasES.Core
             if (id.Trim() != id) throw new ArgumentException($"A stream must not start or end with whitespace characters, got '{id}'");
             if (id[0] == '$') throw new ArgumentException($"A stream must not start with an $, got '{id}'");
             if (id.Contains('*', StringComparison.Ordinal)) throw new ArgumentException($"A stream must not contain the '*' character, got '{id}'");
+            if (id.Contains('\uFFFF', StringComparison.Ordinal)) throw new ArgumentException($"A stream must not contain the unicode 0xFFFF character, got '{id}'");
         }
 
         /// <summary>
@@ -93,6 +94,25 @@ namespace YasES.Core
         /// Returns true if is a single stream identifier, otherwise false.
         /// </summary>
         public bool IsSingleStream => StreamId != StreamWildcard && StreamId != string.Empty;
+
+        /// <summary>
+        /// Returns true if the current identifier matches <paramref name="other"/>.
+        /// </summary>
+        public bool Matches(StreamIdentifier other)
+        {
+            if (!other.IsSingleStream)
+                return false;
+            if (BucketId != other.BucketId)
+                return false;
+
+            if (MatchesAllStreams)
+                return true;
+
+            if (IsSingleStream)
+                return StreamId.Equals(other.StreamId, StringComparison.Ordinal);
+            else
+                return other.StreamId.StartsWith(StreamIdPrefix, StringComparison.Ordinal);
+        }
 
         public bool Equals(StreamIdentifier other)
         {

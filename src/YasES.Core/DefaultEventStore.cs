@@ -10,14 +10,13 @@ namespace YasES.Core
         public DefaultEventStore(Container container)
         {
             _container = container;
+            Services = container;
             Events = container.Resolve<IEventReadWrite>();
-            Services.Register<IEventStore>(this);
-            Services.Register<IEventReadWrite>(this.Events);
         }
 
         public IEventReadWrite Events { get; }
 
-        public Container Services { get; } = new Container();
+        public Container Services { get; } 
 
         protected virtual void Dispose(bool disposing)
         {

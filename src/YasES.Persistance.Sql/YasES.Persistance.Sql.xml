@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>YasES.Persistance.Sql</name>
+    </assembly>
+    <members>
+        <member name="M:YasES.Persistance.Sql.DbConnectionPool.GetReadyConnections">
+            <summary>
+            Returns the number of connections which are ready for usage
+            within the pool. The result will not include connections which 
+            are currently in use.
+            </summary>
+        </member>
+    </members>
+</doc>

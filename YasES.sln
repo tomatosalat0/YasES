@@ -19,7 +19,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{A9
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YasES.Examples.PersonList", "examples\YasES.Examples.PersonList\YasES.Examples.PersonList.csproj", "{2465E8B7-7691-4A7E-BE70-CD8B71889EF2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YasES.Examples.Simple", "examples\YasES.Examples.Simple\YasES.Examples.Simple.csproj", "{8113E0EA-C997-433D-8419-65A752F7C1D0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YasES.Examples.Simple", "examples\YasES.Examples.Simple\YasES.Examples.Simple.csproj", "{8113E0EA-C997-433D-8419-65A752F7C1D0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YasES.Plugins.Messaging", "src\YasES.Plugins.Messaging\YasES.Plugins.Messaging.csproj", "{F1C5D81C-C0EF-42FD-8E62-60DE69AD52D7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YasES.Plugins.Messaging.Tests", "tests\YasES.Plugins.Messaging.Tests\YasES.Plugins.Messaging.Tests.csproj", "{0B1FF02D-D2D7-449C-8B19-88EB2311C147}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -55,6 +59,14 @@ Global
 		{8113E0EA-C997-433D-8419-65A752F7C1D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8113E0EA-C997-433D-8419-65A752F7C1D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8113E0EA-C997-433D-8419-65A752F7C1D0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F1C5D81C-C0EF-42FD-8E62-60DE69AD52D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1C5D81C-C0EF-42FD-8E62-60DE69AD52D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1C5D81C-C0EF-42FD-8E62-60DE69AD52D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1C5D81C-C0EF-42FD-8E62-60DE69AD52D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B1FF02D-D2D7-449C-8B19-88EB2311C147}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B1FF02D-D2D7-449C-8B19-88EB2311C147}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B1FF02D-D2D7-449C-8B19-88EB2311C147}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B1FF02D-D2D7-449C-8B19-88EB2311C147}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -64,6 +76,7 @@ Global
 		{147D89CE-29EC-4379-A14F-DD25B3821DC9} = {A98D8ADA-8FF8-47AF-9795-89FBA7046060}
 		{2465E8B7-7691-4A7E-BE70-CD8B71889EF2} = {A9102E70-BFCE-4520-98DF-3F350B9768E4}
 		{8113E0EA-C997-433D-8419-65A752F7C1D0} = {A9102E70-BFCE-4520-98DF-3F350B9768E4}
+		{0B1FF02D-D2D7-449C-8B19-88EB2311C147} = {A98D8ADA-8FF8-47AF-9795-89FBA7046060}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CEE08DD6-85E4-4FAA-AF06-CAD40D3F2AD7}

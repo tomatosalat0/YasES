@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>YasES.Persistance.Sqlite</name>
+    </assembly>
+    <members>
+        <member name="P:YasES.Persistance.Sqlite.SqliteConfiguration.TableName">
+            <summary>
+            Defines the name of the event store table within the database file. 
+            Defaults to <c>Events</c>.
+            </summary>
+        </member>
+        <member name="P:YasES.Persistance.Sqlite.SqliteConfiguration.PaginationSize">
+            <summary>
+            Defines the pagination size when reading events. Lower values
+            will reduce the read lock within the database but increases
+            the number of queries executed when more items than the specified
+            page size would get returned.
+            </summary>
+        </member>
+    </members>
+</doc>

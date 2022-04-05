@@ -2,16 +2,16 @@
 
 namespace YasES.Core
 {
-    public class Wireup
+    public class EventStoreBuilder
     {
         private readonly Container _container = new Container();
 
-        public static Wireup Init()
+        public static EventStoreBuilder Init()
         {
-            return new Wireup();
+            return new EventStoreBuilder();
         }
 
-        public Wireup ConfigureContainer(Action<Container> handler)
+        public virtual EventStoreBuilder ConfigureContainer(Action<Container> handler)
         {
             handler(_container);
             return this;

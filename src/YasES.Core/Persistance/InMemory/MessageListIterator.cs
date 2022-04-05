@@ -14,25 +14,25 @@ namespace YasES.Persistance.InMemory
             _container = container;
         }
 
-        internal IEnumerable<IReadEventMessage> Forward(CheckpointToken lowerBoundExclusive, CheckpointToken upperBoundExclusive)
+        internal IEnumerable<IStoredEventMessage> Forward(CheckpointToken lowerBoundExclusive, CheckpointToken upperBoundExclusive)
         {
-            List<IReadEventMessage> result = BuildSnapshot(p => p.Checkpoint > lowerBoundExclusive && p.Checkpoint < upperBoundExclusive)
+            List<IStoredEventMessage> result = BuildSnapshot(p => p.Checkpoint > lowerBoundExclusive && p.Checkpoint < upperBoundExclusive)
                 .OrderBy(p => p.Checkpoint)
                 .ToList();
             return result;
         }
 
-        internal IEnumerable<IReadEventMessage> Backward(CheckpointToken lowerBoundExclusive, CheckpointToken upperBoundExclusive)
+        internal IEnumerable<IStoredEventMessage> Backward(CheckpointToken lowerBoundExclusive, CheckpointToken upperBoundExclusive)
         {
-            List<IReadEventMessage> result = BuildSnapshot(p => p.Checkpoint > lowerBoundExclusive && p.Checkpoint < upperBoundExclusive)
+            List<IStoredEventMessage> result = BuildSnapshot(p => p.Checkpoint > lowerBoundExclusive && p.Checkpoint < upperBoundExclusive)
                 .OrderByDescending(p => p.Checkpoint)
                 .ToList();
             return result;
         }
 
-        private IReadOnlyList<IReadEventMessage> BuildSnapshot(Func<IReadEventMessage, bool> predicate)
+        private IReadOnlyList<IStoredEventMessage> BuildSnapshot(Func<IStoredEventMessage, bool> predicate)
         {
-            List<IReadEventMessage> result = new List<IReadEventMessage>(
+            List<IStoredEventMessage> result = new List<IStoredEventMessage>(
                 _container.SelectMany(p => p.CreateSnapshot(predicate))
             );
             return result;
