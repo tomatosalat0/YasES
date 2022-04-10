@@ -16,7 +16,7 @@ namespace YasES.Core
 
         /// <summary>
         /// Creates a stream identifier which points to exactly one stream. The
-        /// stream is defined by <paramref name="streamId"/>. 
+        /// stream is defined by <paramref name="streamId"/>.
         /// <paramref name="bucketId"/> and <paramref name="streamId"/> are case sensitive.
         /// </summary>
         public static StreamIdentifier SingleStream(string bucketId, string streamId)

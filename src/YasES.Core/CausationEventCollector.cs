@@ -5,17 +5,17 @@ using System.Linq;
 namespace YasES.Core
 {
     /// <summary>
-    /// All collected events will get the defined correlation id set in their
-    /// header. If a correlation id is already set, it won't get adjusted.
+    /// All collected events will get the defined causation id set in their
+    /// header. If a causation id is already set, it won't get adjusted.
     /// </summary>
-    public class CorrelationEventCollector : EventHeaderDecorator, IEventCollector
+    public class CausationEventCollector : EventHeaderDecorator, IEventCollector
     {
         private readonly IEventCollector _inner;
 
-        public CorrelationEventCollector(string correlationId, IEventCollector inner)
-            : base(CommonMetaData.CorrelationId, () => correlationId)
+        public CausationEventCollector(string causationId, IEventCollector inner)
+            : base(CommonMetaData.CausationId, () => causationId)
         {
-            if (correlationId is null) throw new ArgumentNullException(nameof(correlationId));
+            if (causationId is null) throw new ArgumentNullException(nameof(causationId));
             _inner = inner ?? throw new ArgumentNullException(nameof(inner));
         }
 
@@ -35,11 +35,11 @@ namespace YasES.Core
         }
     }
 
-    public static class CorrelationEventCollectorExtensions
+    public static class CausationEventCollectorExtensions
     {
-        public static IEventCollector AssignCorrelationId(this IEventCollector collector, string correlationId)
+        public static IEventCollector AssignCausationId(this IEventCollector collector, string causationId)
         {
-            return new CorrelationEventCollector(correlationId, collector);
+            return new CausationEventCollector(causationId, collector);
         }
     }
 }

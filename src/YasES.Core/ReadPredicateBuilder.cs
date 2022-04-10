@@ -11,6 +11,9 @@ namespace YasES.Core
             return new State();
         }
 
+        /// <summary>
+        /// Returns all events which match the specified <paramref name="identifier"/>.
+        /// </summary>
         public static ReadPredicate Forwards(StreamIdentifier identifier)
         {
             return Custom()
@@ -21,6 +24,9 @@ namespace YasES.Core
                 .Build();
         }
 
+        /// <summary>
+        /// Returns all events which match one of the specified <paramref name="identifier"/>.
+        /// </summary>
         public static ReadPredicate Forwards(StreamIdentifier identifier, params StreamIdentifier[] identifiers)
         {
             return Custom()
@@ -31,6 +37,10 @@ namespace YasES.Core
                 .Build();
         }
 
+        /// <summary>
+        /// Returns all events which match the specified <paramref name="identifier"/> in the reverse creation
+        /// order.
+        /// </summary>
         public static ReadPredicate Backwards(StreamIdentifier identifier)
         {
             return Custom()
@@ -41,6 +51,10 @@ namespace YasES.Core
                 .Build();
         }
 
+        /// <summary>
+        /// Returns all events which match one of the specified <paramref name="identifier"/> in the reverse creation
+        /// order.
+        /// </summary>
         public static ReadPredicate Backwards(StreamIdentifier identifier, params StreamIdentifier[] identifiers)
         {
             return Custom()
@@ -53,7 +67,7 @@ namespace YasES.Core
 
         private class State : IAfterInit, IAfterStreams, IAfterDirection, IAfterEventFilter, ICompleted
         {
-            private List<StreamIdentifier> _streams = new List<StreamIdentifier>();
+            private readonly List<StreamIdentifier> _streams = new List<StreamIdentifier>();
             private bool _goBackwards = false;
             private IReadOnlySet<string>? _eventNames;
             private bool _eventNamesIncludes;
@@ -152,50 +166,98 @@ namespace YasES.Core
 
         public interface IAfterInit
         {
+            /// <summary>
+            /// Returns events where the stream id matches <paramref name="identifier"/>.
+            /// </summary>
             IAfterStreams FromStream(StreamIdentifier identifier);
 
+            /// <summary>
+            /// Returns events where the stream id matches any of the provided <paramref name="identifiers"/>.
+            /// </summary>
             IAfterStreams FromStreams(IEnumerable<StreamIdentifier> identifiers);
 
+            /// <summary>
+            /// Returns events where the stream id matches any of the provided <paramref name="identifiers"/>.
+            /// </summary>
             IAfterStreams FromStreams(params StreamIdentifier[] identifiers);
         }
 
         public interface IAfterStreams
         {
+            /// <summary>
+            /// The events are returned in the order they were commited.
+            /// </summary>
             IAfterDirection ReadForwards();
 
+            /// <summary>
+            /// The events are returned in the reverse order they were commited.
+            /// </summary>
             IAfterDirection ReadBackwards();
         }
 
         public interface IAfterDirection
         {
+            /// <summary>
+            /// No filtering in <see cref="IEventMessage.EventName"/> will get used.
+            /// </summary>
             IAfterEventFilter IncludeAllEvents();
 
+            /// <summary>
+            /// Only events where <see cref="IEventMessage.EventName"/> is within the provided set
+            /// of allowed <paramref name="eventNames"/>.
+            /// </summary>
             IAfterEventFilter OnlyIncluding(IReadOnlySet<string> eventNames);
 
+            /// <summary>
+            /// Only events where <see cref="IEventMessage.EventName"/> is not within the provided set
+            /// of <paramref name="excludingNames"/>.
+            /// </summary>
             IAfterEventFilter AllExcluding(IReadOnlySet<string> excludingNames);
         }
 
         public interface IAfterEventFilter
         {
+            /// <summary>
+            /// Only include events where the <see cref="IEventMessage.Headers"/> contains a <see cref="CommonMetaData.CorrelationId"/>
+            /// and the value inside that header is equal to <paramref name="correlationId"/>.
+            /// </summary>
             ICompleted HavingTheCorrelationId(string correlationId);
 
+            /// <summary>
+            /// No further filtering is used.
+            /// </summary>
             ICompleted WithoutCheckpointLimit();
 
+            /// <summary>
+            /// Only events which where saved after the provided <paramref name="token"/> are returned.
+            /// </summary>
             ICompleted RaisedAfterCheckpoint(CheckpointToken token);
 
+            /// <summary>
+            /// Only events which where saved before the provided <paramref name="token"/> are returned.
+            /// </summary>
             ICompleted RaisedBeforeCheckpoint(CheckpointToken token);
 
+            /// <summary>
+            /// Only events which where saved between the <paramref name="lowerBoundExclusive"/> and <paramref name="upperBoundExclusive"/>.
+            /// </summary>
             ICompleted RaisedBetweenCheckpoints(CheckpointToken lowerBoundExclusive, CheckpointToken upperBoundExclusive);
         }
 
         public interface ICompleted
         {
+            /// <summary>
+            /// Create the <see cref="ReadPredicate"/> which can get passed to <see cref="IEventRead.Read(ReadPredicate)"/>.
+            /// </summary>
             ReadPredicate Build();
         }
     }
 
     public static class IAfterInitExtensions
     {
+        /// <summary>
+        /// Include all events of all streams which are within the provided <paramref name="bucketId"/>.
+        /// </summary>
         public static ReadPredicateBuilder.IAfterStreams FromAllStreamsInBucket(this ReadPredicateBuilder.IAfterInit builder, string bucketId)
         {
             return builder.FromStream(StreamIdentifier.AllStreams(bucketId));
@@ -204,12 +266,18 @@ namespace YasES.Core
 
     public static class IAfterDirectionExtensions
     {
+        /// <summary>
+        /// Only events where <see cref="IEventMessage.EventName"/> is equal to <paramref name="eventName"/> are returned.
+        /// </summary>
         public static ReadPredicateBuilder.IAfterEventFilter OnlyIncluding(this ReadPredicateBuilder.IAfterDirection builder, string eventName)
         {
             if (eventName is null) throw new ArgumentNullException(nameof(eventName));
             return builder.OnlyIncluding(new HashSet<string>() { eventName });
         }
 
+        /// <summary>
+        /// Only events where <see cref="IEventMessage.EventName"/> is equal to one of <paramref name="eventName"/> are returned.
+        /// </summary>
         public static ReadPredicateBuilder.IAfterEventFilter OnlyIncluding(this ReadPredicateBuilder.IAfterDirection builder, string eventName, params string[] otherNames)
         {
             if (eventName is null) throw new ArgumentNullException(nameof(eventName));
@@ -218,12 +286,18 @@ namespace YasES.Core
             return builder.OnlyIncluding(set);
         }
 
+        /// <summary>
+        /// Only events where <see cref="IEventMessage.EventName"/> is not equal to <paramref name="eventName"/> are returned.
+        /// </summary>
         public static ReadPredicateBuilder.IAfterEventFilter AllExcluding(this ReadPredicateBuilder.IAfterDirection builder, string eventName)
         {
             if (eventName is null) throw new ArgumentNullException(nameof(eventName));
             return builder.AllExcluding(new HashSet<string>() { eventName });
         }
 
+        /// <summary>
+        /// Only events where <see cref="IEventMessage.EventName"/> is not equal to one of the <paramref name="eventName"/> are returned.
+        /// </summary>
         public static ReadPredicateBuilder.IAfterEventFilter AllExcluding(this ReadPredicateBuilder.IAfterDirection builder, string eventName, params string[] otherNames)
         {
             if (eventName is null) throw new ArgumentNullException(nameof(eventName));

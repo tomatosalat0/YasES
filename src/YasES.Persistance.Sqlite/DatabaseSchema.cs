@@ -3,8 +3,8 @@
 namespace YasES.Persistance.Sqlite
 {
     internal class DatabaseSchema
-	{
-		private const string InitializeStatement =
+    {
+        private const string InitializeStatement =
 @"
 CREATE TABLE IF NOT EXISTS '{{TableName}}' (
 	'Checkpoint'	INTEGER,
@@ -57,22 +57,22 @@ BEGIN
 END;
 ";
 
-		private readonly IDbConnection _connection;
-		private readonly SqliteConfiguration _configuration;
+        private readonly IDbConnection _connection;
+        private readonly SqliteConfiguration _configuration;
 
-		public DatabaseSchema(IDbConnection connection, SqliteConfiguration configuration)
+        public DatabaseSchema(IDbConnection connection, SqliteConfiguration configuration)
         {
             _connection = connection;
             _configuration = configuration;
         }
 
-		public void Initialize()
+        public void Initialize()
         {
-			using (IDbCommand command = _connection.CreateCommand())
+            using (IDbCommand command = _connection.CreateCommand())
             {
-				command.CommandText = InitializeStatement.Replace("{{TableName}}", _configuration.TableName);
-				command.ExecuteNonQuery();
+                command.CommandText = InitializeStatement.Replace("{{TableName}}", _configuration.TableName);
+                command.ExecuteNonQuery();
             }
         }
-	}
+    }
 }

@@ -7,7 +7,7 @@
         <member name="M:YasES.Persistance.Sql.DbConnectionPool.GetReadyConnections">
             <summary>
             Returns the number of connections which are ready for usage
-            within the pool. The result will not include connections which 
+            within the pool. The result will not include connections which
             are currently in use.
             </summary>
         </member>

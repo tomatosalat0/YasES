@@ -5,7 +5,7 @@ using YasES.Core;
 
 namespace YasES.Persistance.InMemory
 {
-    internal class MessageListIterator 
+    internal class MessageListIterator
     {
         private readonly IReadOnlyList<MessageListContainer> _container;
 

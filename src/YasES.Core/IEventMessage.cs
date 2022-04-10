@@ -6,14 +6,14 @@ namespace YasES.Core
     public interface IEventMessage
     {
         /// <summary>
-        /// Defines the name of the event. 
+        /// Defines the name of the event.
         /// </summary>
         string EventName { get; }
 
         /// <summary>
         /// Contains meta-information of the event.
         /// </summary>
-        IReadOnlyDictionary<string, object> Headers { get; } 
+        IReadOnlyDictionary<string, object> Headers { get; }
 
         /// <summary>
         /// The payload of the event.

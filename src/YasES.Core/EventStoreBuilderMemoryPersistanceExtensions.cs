@@ -6,9 +6,9 @@ namespace YasES.Core
     {
         public static EventStoreBuilder UseInMemoryPersistance(this EventStoreBuilder wireup)
         {
-            return wireup.ConfigureContainer((container) => 
+            return wireup.ConfigureServices((container) =>
             {
-                container.Register<IEventReadWrite>((_) => new InMemoryPersistanceEngine());
+                container.RegisterSingleton<IEventReadWrite>((_) => new InMemoryPersistanceEngine());
             });
         }
     }

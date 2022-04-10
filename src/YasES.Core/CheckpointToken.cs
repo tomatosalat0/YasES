@@ -43,26 +43,13 @@ namespace YasES.Core
 
         public override string ToString()
         {
-            return Value.ToString();
+            return Value.ToString(CultureInfo.InvariantCulture);
         }
 
         public int CompareTo(CheckpointToken other)
         {
             return Value.CompareTo(other.Value);
         }
-
-        public static bool operator ==(CheckpointToken lhs, CheckpointToken rhs) => lhs.Equals(rhs);
-        public static bool operator !=(CheckpointToken lhs, CheckpointToken rhs) => !(lhs.Equals(rhs));
-        public static bool operator >(CheckpointToken lhs, CheckpointToken rhs) => lhs.Value > rhs.Value;
-        public static bool operator >=(CheckpointToken lhs, CheckpointToken rhs) => lhs.Value >= rhs.Value;
-        public static bool operator <(CheckpointToken lhs, CheckpointToken rhs) => lhs.Value < rhs.Value;
-        public static bool operator <=(CheckpointToken lhs, CheckpointToken rhs) => lhs.Value <= rhs.Value;
-        public static CheckpointToken operator +(CheckpointToken lhs, long rhs) => new CheckpointToken(lhs.Value + rhs);
-        public static CheckpointToken operator +(CheckpointToken lhs, CheckpointToken rhs) => new CheckpointToken(lhs.Value + rhs.Value);
-        public static CheckpointToken operator +(long lhs, CheckpointToken rhs) => new CheckpointToken(lhs + rhs.Value);
-        public static CheckpointToken operator -(CheckpointToken lhs, long rhs) => new CheckpointToken(lhs.Value - rhs);
-        public static CheckpointToken operator -(CheckpointToken lhs, CheckpointToken rhs) => new CheckpointToken(lhs.Value - rhs.Value);
-        public static CheckpointToken operator -(long lhs, CheckpointToken rhs) => new CheckpointToken(lhs - rhs.Value);
 
         public static CheckpointToken Parse(string value)
         {
@@ -93,5 +80,18 @@ namespace YasES.Core
             token = new CheckpointToken(result);
             return true;
         }
+
+        public static bool operator ==(CheckpointToken lhs, CheckpointToken rhs) => lhs.Equals(rhs);
+        public static bool operator !=(CheckpointToken lhs, CheckpointToken rhs) => !(lhs.Equals(rhs));
+        public static bool operator >(CheckpointToken lhs, CheckpointToken rhs) => lhs.Value > rhs.Value;
+        public static bool operator >=(CheckpointToken lhs, CheckpointToken rhs) => lhs.Value >= rhs.Value;
+        public static bool operator <(CheckpointToken lhs, CheckpointToken rhs) => lhs.Value < rhs.Value;
+        public static bool operator <=(CheckpointToken lhs, CheckpointToken rhs) => lhs.Value <= rhs.Value;
+        public static CheckpointToken operator +(CheckpointToken lhs, long rhs) => new CheckpointToken(lhs.Value + rhs);
+        public static CheckpointToken operator +(CheckpointToken lhs, CheckpointToken rhs) => new CheckpointToken(lhs.Value + rhs.Value);
+        public static CheckpointToken operator +(long lhs, CheckpointToken rhs) => new CheckpointToken(lhs + rhs.Value);
+        public static CheckpointToken operator -(CheckpointToken lhs, long rhs) => new CheckpointToken(lhs.Value - rhs);
+        public static CheckpointToken operator -(CheckpointToken lhs, CheckpointToken rhs) => new CheckpointToken(lhs.Value - rhs.Value);
+        public static CheckpointToken operator -(long lhs, CheckpointToken rhs) => new CheckpointToken(lhs - rhs.Value);
     }
 }

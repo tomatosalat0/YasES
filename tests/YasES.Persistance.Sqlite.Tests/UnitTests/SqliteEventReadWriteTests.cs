@@ -5,6 +5,7 @@ using System.Linq;
 using YasES.Core;
 using YasES.Persistance.Sql;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Globalization;
 
 namespace YasES.Persistance.Sqlite.Tests.UnitTests
 {
@@ -130,8 +131,8 @@ namespace YasES.Persistance.Sqlite.Tests.UnitTests
 
             List<IStoredEventMessage> messages = engine.Read(ReadPredicateBuilder.Forwards(identifier)).ToList();
             Assert.AreEqual(2000, messages.Count);
-            Assert.AreEqual(0, Convert.ToInt32(messages[0].Headers["index"]));
-            Assert.AreEqual(1999, Convert.ToInt32(messages.Last().Headers["index"]));
+            Assert.AreEqual(0, Convert.ToInt32(messages[0].Headers["index"], CultureInfo.InvariantCulture));
+            Assert.AreEqual(1999, Convert.ToInt32(messages.Last().Headers["index"], CultureInfo.InvariantCulture));
         }
 
         [TestMethod]
@@ -184,8 +185,8 @@ namespace YasES.Persistance.Sqlite.Tests.UnitTests
 
             List<IStoredEventMessage> messages = engine.Read(ReadPredicateBuilder.Backwards(identifier)).ToList();
             Assert.AreEqual(2000, messages.Count);
-            Assert.AreEqual(1999, Convert.ToInt32(messages[0].Headers["index"]));
-            Assert.AreEqual(0, Convert.ToInt32(messages.Last().Headers["index"]));
+            Assert.AreEqual(1999, Convert.ToInt32(messages[0].Headers["index"], CultureInfo.InvariantCulture));
+            Assert.AreEqual(0, Convert.ToInt32(messages.Last().Headers["index"], CultureInfo.InvariantCulture));
         }
 
         [TestMethod]
@@ -218,7 +219,7 @@ namespace YasES.Persistance.Sqlite.Tests.UnitTests
                 .Build();
             List<IStoredEventMessage> messages = engine.Read(predicate).ToList();
             Assert.AreEqual(20, messages.Count);
-            Assert.AreEqual(0, Convert.ToInt32(messages[0].Headers["index"]));
+            Assert.AreEqual(0, Convert.ToInt32(messages[0].Headers["index"], CultureInfo.InvariantCulture));
         }
 
         [TestMethod]
@@ -251,7 +252,7 @@ namespace YasES.Persistance.Sqlite.Tests.UnitTests
                 .Build();
             List<IStoredEventMessage> messages = engine.Read(predicate).ToList();
             Assert.AreEqual(80, messages.Count);
-            Assert.AreEqual(2, Convert.ToInt32(messages[0].Headers["index"]));
+            Assert.AreEqual(2, Convert.ToInt32(messages[0].Headers["index"], CultureInfo.InvariantCulture));
         }
 
         [TestMethod]

@@ -7,27 +7,19 @@ namespace YasES.Core
 {
     public sealed class NotificationEventStoreBuilder : EventStoreBuilder
     {
-        private readonly EventStoreBuilder _inner;
-
-        public NotificationEventStoreBuilder(EventStoreBuilder inner, Func<IBrokerCommands, IDisposable?> initialization)
+        public NotificationEventStoreBuilder(EventStoreBuilder parent, Func<IBrokerCommands, IDisposable?> initialization)
+            : base(parent)
         {
             if (initialization is null) throw new ArgumentNullException(nameof(initialization));
-            _inner = inner;
-            _inner.ConfigureContainer((container) =>
+            ConfigureServices((container) =>
             {
                 IMessageBroker broker = new MessageBroker(initialization);
-                container.Register<IMessageBroker>(broker);
+                container.RegisterSingleton<IMessageBroker>(broker);
             });
         }
 
-        public override EventStoreBuilder ConfigureContainer(Action<Container> handler)
-        {
-            _inner.ConfigureContainer(handler);
-            return this;
-        }
-
         /// <summary>
-        /// After every successful <see cref="IEventWrite.Commit(CommitAttempt)"/>, 
+        /// After every successful <see cref="IEventWrite.Commit(CommitAttempt)"/>,
         /// a message wihtin the <see cref="IMessageBroker"/> gets published. The topic
         /// of the event will be the provided <paramref name="topicName"/>. The message
         /// will be an instance of <see cref="AfterCommitEvent"/>.
@@ -42,7 +34,7 @@ namespace YasES.Core
 
         /// <summary>
         /// After an successful call to <see cref="IEventWrite.Commit(CommitAttempt)"/> and
-        /// the commited stream matches the provided <paramref name="streamIdentifier"/> 
+        /// the commited stream matches the provided <paramref name="streamIdentifier"/>
         /// (see <see cref="CommitAttempt.StreamIdentifier"/> and <see cref="StreamIdentifier.Matches(StreamIdentifier)"/>),
         /// a message within the <see cref="IMessageBroker"/> gets published. The topic
         /// of the event will be the provided <paramref name="topicName"/>. The message
@@ -58,23 +50,18 @@ namespace YasES.Core
 
         private void AddTopicEventProducer(string topicName, Func<CommitAttempt, bool> predicate)
         {
-            ConfigureContainer((container) =>
+            ConfigureServices((services) =>
             {
-                IEventReadWrite existing = container.Resolve<IEventReadWrite>();
-                IMessageBroker broker = container.Resolve<IMessageBroker>();
+                IEventReadWrite existing = services.Resolve<IEventReadWrite>();
+                IMessageBroker broker = services.Resolve<IMessageBroker>();
                 IEventReadWrite overwritten = new AfterCommitStore(existing, topicName, broker, predicate);
-                container.Register<IEventReadWrite>(overwritten);
+                services.RegisterSingleton<IEventReadWrite>(overwritten);
             });
         }
 
         private Func<CommitAttempt, bool> BuildStreamIdentifierMatchPredicate(StreamIdentifier streamIdentifier)
         {
             return (attempt) => streamIdentifier.Matches(attempt.StreamIdentifier);
-        }
-
-        public override IEventStore Build()
-        {
-            return _inner.Build();
         }
 
         private class AfterCommitStore : IEventReadWrite

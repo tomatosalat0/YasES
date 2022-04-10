@@ -4,7 +4,6 @@ namespace YasES.Core
 {
     public static class IEventReadExtensions
     {
-
         /// <summary>
         /// Returns a reader for the <paramref name="stream"/>, starting at <paramref name="lowerBoundExclusive"/> going to the future.
         /// </summary>
@@ -19,7 +18,7 @@ namespace YasES.Core
         }
 
         /// <summary>
-        /// Returns a reader for the <paramref name="stream"/>, starting at <paramref name="lowerBoundExclusive"/> going to the future. 
+        /// Returns a reader for the <paramref name="stream"/>, starting at <paramref name="lowerBoundExclusive"/> going to the future.
         /// The reader will end as soon as <paramref name="upperBoundExclusive"/> has been returned or no more messages
         /// could be found inside the store.
         /// </summary>

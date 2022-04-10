@@ -13,7 +13,6 @@ namespace YasES.Core
         /// </summary>
         public static NotificationEventStoreBuilder UseMessageBroker(this EventStoreBuilder builder)
         {
-
             int numberOfThreads = Math.Max(1, Math.Min(5, Environment.ProcessorCount / 2));
             return UseMessageBroker(builder, (c) => new ThreadedBrokerScheduling(numberOfThreads, c));
         }

@@ -22,7 +22,7 @@ namespace YasES.Plugins.Messaging
         }
 
         /// <summary>
-        /// Send the next message to the subscriber. Will return 
+        /// Send the next message to the subscriber. Will return
         /// true if there was any message, otherwise false.
         /// </summary>
         public bool Send()

@@ -6,6 +6,6 @@ namespace YasES.Core
     {
         IEventReadWrite Events { get; }
 
-        Container Services { get; }
+        ServiceCollection Services { get; }
     }
 }

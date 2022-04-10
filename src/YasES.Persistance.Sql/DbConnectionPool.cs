@@ -19,7 +19,7 @@ namespace YasES.Persistance.Sql
 
         /// <summary>
         /// Returns the number of connections which are ready for usage
-        /// within the pool. The result will not include connections which 
+        /// within the pool. The result will not include connections which
         /// are currently in use.
         /// </summary>
         public int GetReadyConnections()
@@ -73,7 +73,7 @@ namespace YasES.Persistance.Sql
         private sealed class SharedDbConnection : IDbConnection
         {
             private readonly IDbConnection _inner;
-            private Action<IDbConnection> _onClose;
+            private readonly Action<IDbConnection> _onClose;
             private bool disposedValue;
 
             public SharedDbConnection(IDbConnection inner, Action<IDbConnection> onClose)
@@ -82,9 +82,13 @@ namespace YasES.Persistance.Sql
                 _onClose = onClose ?? throw new ArgumentNullException(nameof(onClose));
             }
 
+            public string ConnectionString
+            {
+                get => _inner.ConnectionString;
 #pragma warning disable CS8767 // Nullability of reference types in type of parameter doesn't match implicitly implemented member (possibly because of nullability attributes).
-            public string ConnectionString { get => _inner.ConnectionString; set { } }
+                set { }
 #pragma warning restore CS8767 // Nullability of reference types in type of parameter doesn't match implicitly implemented member (possibly because of nullability attributes).
+            }
 
             public int ConnectionTimeout => _inner.ConnectionTimeout;
 

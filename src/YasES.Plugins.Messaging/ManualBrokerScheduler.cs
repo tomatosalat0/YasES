@@ -6,11 +6,11 @@ namespace YasES.Plugins.Messaging
     /// This scheduler allows to execute <see cref="IBrokerCommands"/>
     /// manually by calling the correponding methods from code. While
     /// this was created for easy testing, it might be useful in special
-    /// circumstances. 
+    /// circumstances.
     /// </summary>
     public class ManualBrokerScheduler : IBrokerCommands
     {
-        private IBrokerCommands _scheduling;
+        private readonly IBrokerCommands _scheduling;
 
         public ManualBrokerScheduler(IBrokerCommands scheduling)
         {

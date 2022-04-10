@@ -13,10 +13,11 @@ namespace YasES.Core
 
         public static EventStoreBuilder UseSqlitePersistance(this EventStoreBuilder wireup, string connectionString, Action<SqliteConfiguration> configure)
         {
-            return wireup.ConfigureContainer((container) =>
+            return wireup.ConfigureServices((container) =>
             {
-                container.Register<IConnectionFactory>((_) => new SqliteConnectionFactory(connectionString).UseConnectionPool());
-                container.Register<IEventReadWrite, IConnectionFactory>((_, connection) => {
+                container.RegisterSingleton<IConnectionFactory>((_) => new SqliteConnectionFactory(connectionString).UseConnectionPool());
+                container.RegisterSingleton<IEventReadWrite, IConnectionFactory>((_, connection) =>
+                {
                     SqlitePersistanceEngine result = new SqlitePersistanceEngine(connection, configure);
                     result.Initialize();
                     return result;

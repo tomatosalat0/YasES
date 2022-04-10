@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
+using System.Globalization;
 using YasES.Core;
 using YasES.Core.Persistance;
 
@@ -78,10 +79,15 @@ namespace YasES.Persistance.Sqlite
                 StreamIdentifier = StreamIdentifier.SingleStream(reader.GetString(OffsetBucketId), reader.GetString(OffsetStreamId));
                 CommitId = new CommitId(reader.GetGuid(OffsetCommitId));
                 EventName = reader.GetString(OffsetEventName);
-                CommitTimeUtc = DateTime.SpecifyKind(Convert.ToDateTime(reader.GetValue(OffsetCommitCreationDate)), DateTimeKind.Utc);
-                CreationDateUtc = DateTime.SpecifyKind(Convert.ToDateTime(reader.GetValue(OffsetEventCreationDate)), DateTimeKind.Utc);
+                CommitTimeUtc = ReadSqliteDateTime(reader, OffsetCommitCreationDate);
+                CreationDateUtc = ReadSqliteDateTime(reader, OffsetEventCreationDate);
                 Headers = HeaderSerialization.DeserializeHeaderJsonOrDefault(reader.GetValue(OffsetHeaders) as byte[] ?? null);
                 Payload = reader.GetValue(OffsetPayload) as byte[] ?? Memory<byte>.Empty;
+            }
+
+            private static DateTime ReadSqliteDateTime(IDataReader reader, int offset)
+            {
+                return DateTime.SpecifyKind(Convert.ToDateTime(reader.GetValue(offset), CultureInfo.InvariantCulture), DateTimeKind.Utc);
             }
 
             public CheckpointToken Checkpoint { get; }

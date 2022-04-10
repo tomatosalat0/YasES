@@ -12,9 +12,9 @@ namespace YasES.Core.Tests.UnitTests
         {
             IEventReadWrite storage = new TestEventReadWrite();
             IEventStore eventStore = EventStoreBuilder.Init()
-                .ConfigureContainer((container) =>
+                .ConfigureServices((services) =>
                 {
-                    container.Register<IEventReadWrite>(storage);
+                    services.RegisterSingleton<IEventReadWrite>(storage);
                 })
                 .Build();
 
@@ -27,10 +27,10 @@ namespace YasES.Core.Tests.UnitTests
             DisposeTrack tracker = new DisposeTrack();
             IEventReadWrite storage = new TestEventReadWrite();
             IEventStore eventStore = EventStoreBuilder.Init()
-                .ConfigureContainer((container) =>
+                .ConfigureServices((services) =>
                 {
-                    container.Register<DisposeTrack>(tracker);
-                    container.Register<IEventReadWrite>(storage);
+                    services.RegisterSingleton<DisposeTrack>(tracker);
+                    services.RegisterSingleton<IEventReadWrite>(storage);
                 })
                 .Build();
             eventStore.Dispose();

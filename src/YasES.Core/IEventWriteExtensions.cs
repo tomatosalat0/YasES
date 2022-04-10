@@ -3,7 +3,6 @@ using System.Collections.Generic;
 
 namespace YasES.Core
 {
-
     public static class IEventWriteExtensions
     {
         public static void Commit(this IEventWrite writer, StreamIdentifier identifier, IReadOnlyList<IEventMessage> messages)

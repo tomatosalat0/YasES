@@ -4,19 +4,19 @@ namespace YasES.Core
 {
     public class DefaultEventStore : IEventStore
     {
-        private readonly Container _container;
+        private readonly ServiceCollection _services;
         private bool _disposedValue;
 
-        public DefaultEventStore(Container container)
+        public DefaultEventStore(ServiceCollection services)
         {
-            _container = container;
-            Services = container;
-            Events = container.Resolve<IEventReadWrite>();
+            _services = services;
+            Services = services;
+            Events = services.Resolve<IEventReadWrite>();
         }
 
         public IEventReadWrite Events { get; }
 
-        public Container Services { get; } 
+        public ServiceCollection Services { get; }
 
         protected virtual void Dispose(bool disposing)
         {
@@ -26,7 +26,7 @@ namespace YasES.Core
                 if (disposing)
                 {
                     Services.Dispose();
-                    _container.Dispose();
+                    _services.Dispose();
                 }
             }
         }

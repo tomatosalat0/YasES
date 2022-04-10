@@ -3,7 +3,7 @@
     public class SqliteConfiguration
     {
         /// <summary>
-        /// Defines the name of the event store table within the database file. 
+        /// Defines the name of the event store table within the database file.
         /// Defaults to <c>Events</c>.
         /// </summary>
         public string TableName { get; set; } = "Events";

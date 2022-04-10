@@ -92,7 +92,7 @@ namespace YasES.Plugins.Messaging
 
         private void RemoveQueue(Queue queue)
         {
-            lock(_queuesLock)
+            lock (_queuesLock)
             {
                 _queues.Remove(queue);
             }

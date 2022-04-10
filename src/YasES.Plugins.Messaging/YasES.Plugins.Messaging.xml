@@ -25,38 +25,6 @@
             in a loop until it returns 0.
             </summary>
         </member>
-        <member name="F:YasES.Plugins.Messaging.MessageState.Initial">
-            <summary>
-            The initial state of the message.
-            </summary>
-        </member>
-        <member name="F:YasES.Plugins.Messaging.MessageState.Acknowledged">
-            <summary>
-            <see cref="M:YasES.Plugins.Messaging.IMessageOperation.Ack"/> has been called.
-            </summary>
-        </member>
-        <member name="F:YasES.Plugins.Messaging.MessageState.NotAcknowledged">
-            <summary>
-            <see cref="M:YasES.Plugins.Messaging.IMessageOperation.Nack"/> has been called.
-            </summary>
-        </member>
-        <member name="P:YasES.Plugins.Messaging.IMessageOperation.State">
-            <summary>
-            Gets the state of the message.
-            </summary>
-        </member>
-        <member name="M:YasES.Plugins.Messaging.IMessageOperation.Ack">
-            <summary>
-            Indicates that the message has been processed.
-            The message won't get send again.
-            </summary>
-        </member>
-        <member name="M:YasES.Plugins.Messaging.IMessageOperation.Nack">
-            <summary>
-            Indicates that the message has not been processed.
-            The message won't get send again.
-            </summary>
-        </member>
         <member name="P:YasES.Plugins.Messaging.IMessage.Payload">
             <summary>
             The payload of the message.
@@ -80,6 +48,23 @@
             does not exist, it will get skipped silently.
             </summary>
         </member>
+        <member name="P:YasES.Plugins.Messaging.IMessageOperation.State">
+            <summary>
+            Gets the state of the message.
+            </summary>
+        </member>
+        <member name="M:YasES.Plugins.Messaging.IMessageOperation.Ack">
+            <summary>
+            Indicates that the message has been processed.
+            The message won't get send again.
+            </summary>
+        </member>
+        <member name="M:YasES.Plugins.Messaging.IMessageOperation.Nack">
+            <summary>
+            Indicates that the message has not been processed.
+            The message won't get send again.
+            </summary>
+        </member>
         <member name="M:YasES.Plugins.Messaging.IPublish.Publish``1(``0)">
             <summary>
             Publish the provided <paramref name="message"/> to the
@@ -92,12 +77,12 @@
             Add a new subscription to the current channel. The
             passed <paramref name="messageHandler"/> will get called
             for each event which got published to the current channel.
-            Note: depending on the used broker scheduler, the 
+            Note: depending on the used broker scheduler, the
             <paramref name="messageHandler"/> callback will get called
             from multiple threads and might even get called simultaniously
-            for different events. The <typeparamref name="T"/> should 
+            for different events. The <typeparamref name="T"/> should
             match the type of the message which gets send with
-            <see cref="M:YasES.Plugins.Messaging.IPublish.Publish``1(``0)"/>. 
+            <see cref="M:YasES.Plugins.Messaging.IPublish.Publish``1(``0)"/>.
             </summary>
         </member>
         <member name="M:YasES.Plugins.Messaging.ISubscribe.Subscribe(System.Action{YasES.Plugins.Messaging.IMessage})">
@@ -105,10 +90,10 @@
             Add a new subscription to the current channel. The
             passed <paramref name="messageHandler"/> will get called
             for each event which got published to the current channel.
-            Note: depending on the used broker scheduler, the 
+            Note: depending on the used broker scheduler, the
             <paramref name="messageHandler"/> callback will get called
             from multiple threads and might even get called simultaniously
-            for different events. 
+            for different events.
             </summary>
         </member>
         <member name="T:YasES.Plugins.Messaging.ManualBrokerScheduler">
@@ -116,7 +101,7 @@
             This scheduler allows to execute <see cref="T:YasES.Plugins.Messaging.IBrokerCommands"/>
             manually by calling the correponding methods from code. While
             this was created for easy testing, it might be useful in special
-            circumstances. 
+            circumstances.
             </summary>
         </member>
         <member name="M:YasES.Plugins.Messaging.ManualBrokerScheduler.CallSubscribers">
@@ -132,15 +117,30 @@
             of messages which has been sent in total.
             </summary>
         </member>
+        <member name="F:YasES.Plugins.Messaging.MessageState.Initial">
+            <summary>
+            The initial state of the message.
+            </summary>
+        </member>
+        <member name="F:YasES.Plugins.Messaging.MessageState.Acknowledged">
+            <summary>
+            <see cref="M:YasES.Plugins.Messaging.IMessageOperation.Ack"/> has been called.
+            </summary>
+        </member>
+        <member name="F:YasES.Plugins.Messaging.MessageState.NotAcknowledged">
+            <summary>
+            <see cref="M:YasES.Plugins.Messaging.IMessageOperation.Nack"/> has been called.
+            </summary>
+        </member>
         <member name="M:YasES.Plugins.Messaging.Queue.Send">
             <summary>
-            Send the next message to the subscriber. Will return 
+            Send the next message to the subscriber. Will return
             true if there was any message, otherwise false.
             </summary>
         </member>
         <member name="T:YasES.Plugins.Messaging.ThreadedBrokerScheduling">
             <summary>
-            This scheduler will call the <see cref="T:YasES.Plugins.Messaging.IBrokerCommands"/> from different in the background. 
+            This scheduler will call the <see cref="T:YasES.Plugins.Messaging.IBrokerCommands"/> from different in the background.
             This way all events will get forwarded to each subscriber automatically.
             </summary>
         </member>
@@ -161,7 +161,7 @@
         </member>
         <member name="M:YasES.Core.NotificationEventStoreBuilder.NotifyAfterCommit(System.String)">
             <summary>
-            After every successful <see cref="M:YasES.Core.IEventWrite.Commit(YasES.Core.CommitAttempt)"/>, 
+            After every successful <see cref="M:YasES.Core.IEventWrite.Commit(YasES.Core.CommitAttempt)"/>,
             a message wihtin the <see cref="T:YasES.Plugins.Messaging.IMessageBroker"/> gets published. The topic
             of the event will be the provided <paramref name="topicName"/>. The message
             will be an instance of <see cref="T:YasES.Core.AfterCommitEvent"/>.
@@ -171,7 +171,7 @@
         <member name="M:YasES.Core.NotificationEventStoreBuilder.NotifyAfterCommitForStream(YasES.Core.StreamIdentifier,System.String)">
             <summary>
             After an successful call to <see cref="M:YasES.Core.IEventWrite.Commit(YasES.Core.CommitAttempt)"/> and
-            the commited stream matches the provided <paramref name="streamIdentifier"/> 
+            the commited stream matches the provided <paramref name="streamIdentifier"/>
             (see <see cref="P:YasES.Core.CommitAttempt.StreamIdentifier"/> and <see cref="M:YasES.Core.StreamIdentifier.Matches(YasES.Core.StreamIdentifier)"/>),
             a message within the <see cref="T:YasES.Plugins.Messaging.IMessageBroker"/> gets published. The topic
             of the event will be the provided <paramref name="topicName"/>. The message

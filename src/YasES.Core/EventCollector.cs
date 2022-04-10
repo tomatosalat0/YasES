@@ -36,7 +36,7 @@ namespace YasES.Core
         }
 
         /// <summary>
-        /// Collects all previously added messages and adds them to a single 
+        /// Collects all previously added messages and adds them to a single
         /// <see cref="CommitAttempt"/>. You can only call this method once.
         /// </summary>
         public CommitAttempt BuildCommit(StreamIdentifier stream, CommitId commitId)

@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace YasES.Core
 {
     /// <summary>
-    /// Defines the operation and conditions to execute when reading from 
+    /// Defines the filters to apply when reading from
     /// the event store. Note that a single stream predicate can not
     /// request streams from multiple buckets simultaniously.
     /// </summary>
@@ -18,11 +18,11 @@ namespace YasES.Core
 
         internal ReadPredicate(
             IReadOnlyList<StreamIdentifier> streams,
-            bool reverse, 
-            IReadOnlySet<string>? eventNamesFilter, 
-            bool eventNamesIncluding, 
+            bool reverse,
+            IReadOnlySet<string>? eventNamesFilter,
+            bool eventNamesIncluding,
             string? correlationId,
-            CheckpointToken lowerBound, 
+            CheckpointToken lowerBound,
             CheckpointToken upperBound)
         {
             Streams = streams;
@@ -36,37 +36,38 @@ namespace YasES.Core
 
         /// <summary>
         /// The streams to return within this request. Note that
-        /// all streams will be in the same bucket.
+        /// all streams must be in the same bucket.
         /// </summary>
-        public IReadOnlyList<StreamIdentifier> Streams { get; } 
+        public IReadOnlyList<StreamIdentifier> Streams { get; }
 
         /// <summary>
-        /// True if the events should get returned in the reverse 
-        /// order they were created. If false, the events should
+        /// True if the events get returned in the reverse
+        /// order they were created. If false, the events
         /// get returned in the order they where added to the streams.
         /// </summary>
         public bool Reverse { get; }
 
         /// <summary>
-        /// Optional: if null, no filtering based on the event
-        /// names should happen. If set, the list will 
-        /// contain the exact event names to filter by. 
+        /// Optional: if null, no filtering based on the <see cref="IEventMessage.EventName"/>
+        /// will happen. If set, the list will
+        /// contain the exact event names to filter by.
         /// See <see cref="EventNamesIncluding"/> if the
         /// filter is "include" or "exclude".
         /// </summary>
         public IReadOnlySet<string>? EventNamesFilter { get; }
 
         /// <summary>
-        /// If true, only the events defined in <see cref="EventNamesFilter"/>
-        /// should be included in the result. If false, all events
-        /// exect those having one of the specified names in <see cref="EventNamesFilter"/>
-        /// should be returned.
+        /// If true, only the events where <see cref="IEventMessage.EventName"/> is in <see cref="EventNamesFilter"/>
+        /// are included in the result. If false, all events
+        /// except those having <see cref="IEventMessage.EventName"/> in <see cref="EventNamesFilter"/>
+        /// are be returned.
         /// </summary>
         public bool EventNamesIncluding { get; }
 
         /// <summary>
         /// Optional: if null, this property will get ignored. If defined,
-        /// only events having the specified correlationId in their header should
+        /// only events having the same correlation id (specified by the key
+        /// <see cref="CommonMetaData.CorrelationId"/> within <see cref="IEventMessage.Headers"/>)
         /// get returned.
         /// </summary>
         public string? CorrelationId { get; }

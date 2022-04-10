@@ -4,49 +4,49 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace YasES.Core.Tests.UnitTests
 {
     [TestClass]
-    public class ContainerTests
+    public class ServiceCollectionTests
     {
         [TestMethod]
         public void EmptyContainerThrowsExceptionWhenTryingToResolveInstance()
         {
-            Container container = new Container();
+            ServiceCollection container = new ServiceCollection();
             Assert.ThrowsException<InvalidOperationException>(() => container.Resolve<object>());
         }
 
         [TestMethod]
         public void EmptyContainerResolvesEverythingToDefault()
         {
-            Container container = new Container();
+            ServiceCollection container = new ServiceCollection();
             Assert.IsNull(container.ResolveOrDefault<object>());
         }
 
         [TestMethod]
         public void DisposedContainerThrowsExceptionWhenDisposed()
         {
-            Container container = new Container();
+            ServiceCollection container = new ServiceCollection();
             container.Dispose();
             Assert.ThrowsException<ObjectDisposedException>(() => container.ResolveOrDefault<object>());
             Assert.ThrowsException<ObjectDisposedException>(() => container.Resolve<object>());
         }
 
         [TestMethod]
-        public void ContainerResolvesRegisteredItem()
+        public void ServiceCollectionResolvesRegisteredItem()
         {
-            Container container = new Container();
-            container.Register<int>(42);
+            ServiceCollection container = new ServiceCollection();
+            container.RegisterSingleton<int>(42);
             Assert.AreEqual(42, container.Resolve<int>());
         }
 
         [TestMethod]
-        public void ContainerThrowsExceptionWhenPassingNullFactory()
+        public void ServiceCollectionThrowsExceptionWhenPassingNullFactory()
         {
-            Container container = new Container();
-            Assert.ThrowsException<ArgumentNullException>(() => container.Register<int>(null));
-            Assert.ThrowsException<ArgumentNullException>(() => container.Register<int, int>(null));
+            ServiceCollection container = new ServiceCollection();
+            Assert.ThrowsException<ArgumentNullException>(() => container.RegisterSingleton<int>(null));
+            Assert.ThrowsException<ArgumentNullException>(() => container.RegisterSingleton<int, int>(null));
         }
 
         [TestMethod]
-        public void ContainerCallsFactoryWhenNeeded()
+        public void ServiceCollectionCallsFactoryWhenNeeded()
         {
             int numberOfCalls = 0;
             Func<int> producer = () =>
@@ -55,15 +55,15 @@ namespace YasES.Core.Tests.UnitTests
                 return 42;
             };
 
-            Container container = new Container();
-            container.Register<int>((c) => producer());
+            ServiceCollection container = new ServiceCollection();
+            container.RegisterSingleton<int>((c) => producer());
             Assert.AreEqual(0, numberOfCalls);
             Assert.AreEqual(42, container.Resolve<int>());
             Assert.AreEqual(1, numberOfCalls);
         }
 
         [TestMethod]
-        public void ContainerCallsFactoryOnlyOnce()
+        public void ServiceCollectionCallsFactoryOnlyOnce()
         {
             int numberOfCalls = 0;
             Func<int> producer = () =>
@@ -72,8 +72,8 @@ namespace YasES.Core.Tests.UnitTests
                 return 42;
             };
 
-            Container container = new Container();
-            container.Register<int>((c) => producer());
+            ServiceCollection container = new ServiceCollection();
+            container.RegisterSingleton<int>((c) => producer());
             container.Resolve<int>();
             container.Resolve<int>();
 
@@ -81,36 +81,36 @@ namespace YasES.Core.Tests.UnitTests
         }
 
         [TestMethod]
-        public void ContainerReplacesExistingItem()
+        public void ServiceCollectionReplacesExistingItem()
         {
             CBase first = new CBase();
             CBase second = new CBase();
 
-            Container container = new Container();
-            container.Register(first);
-            container.Register(second);
+            ServiceCollection container = new ServiceCollection();
+            container.RegisterSingleton(first);
+            container.RegisterSingleton(second);
 
             Assert.AreSame(second, container.Resolve<CBase>());
         }
 
         [TestMethod]
-        public void ContainerResolvesAsSoonAsTypeIsRegistered()
+        public void ServiceCollectionResolvesAsSoonAsTypeIsRegistered()
         {
-            Container container = new Container();
+            ServiceCollection container = new ServiceCollection();
             Assert.IsNull(container.ResolveOrDefault<int?>());
-            container.Register<int?>(42);
+            container.RegisterSingleton<int?>(42);
             Assert.AreEqual(42, container.ResolveOrDefault<int?>());
         }
 
         [TestMethod]
-        public void ContainerPassesDependencyInCallback()
+        public void ServiceCollectionPassesDependencyInCallback()
         {
             SomeDerived dependency = new SomeDerived();
             CDerived different = new CDerived();
 
-            Container container = new Container();
-            container.Register<SomeDerived>(dependency);
-            container.Register<CBase, IBase>((c, dep) =>
+            ServiceCollection container = new ServiceCollection();
+            container.RegisterSingleton<SomeDerived>(dependency);
+            container.RegisterSingleton<CBase, IBase>((c, dep) =>
             {
                 Assert.AreSame(dependency, dep);
                 return different;
@@ -119,38 +119,38 @@ namespace YasES.Core.Tests.UnitTests
         }
 
         [TestMethod]
-        public void ContainerThrowsExceptionIfDependencyNotAvailable()
+        public void ServiceCollectionThrowsExceptionIfDependencyNotAvailable()
         {
-            Container container = new Container();
-            Assert.ThrowsException<InvalidOperationException>(() => container.Register<CBase, IBase>((c, dep) => new CBase()));
+            ServiceCollection container = new ServiceCollection();
+            Assert.ThrowsException<InvalidOperationException>(() => container.RegisterSingleton<CBase, IBase>((c, dep) => new CBase()));
         }
 
         [TestMethod]
-        public void ContainerDisposesActiveInstancesIfIDisposableIsImplemented()
+        public void ServiceCollectionDisposesActiveInstancesIfIDisposableIsImplemented()
         {
-            Container container = new Container();
+            ServiceCollection container = new ServiceCollection();
             DisposableTrack tracker = new DisposableTrack();
-            container.Register<DisposableTrack>((_) => tracker);
+            container.RegisterSingleton<DisposableTrack>((_) => tracker);
             container.Resolve<DisposableTrack>();
             container.Dispose();
             Assert.AreEqual(1, tracker.DisposeCalls);
         }
 
         [TestMethod]
-        public void ContainerDisposesInstancesWhichGotDirectlyPassed()
+        public void ServiceCollectionDisposesInstancesWhichGotDirectlyPassed()
         {
-            Container container = new Container();
+            ServiceCollection container = new ServiceCollection();
             DisposableTrack tracker = new DisposableTrack();
-            container.Register<DisposableTrack>(tracker);
+            container.RegisterSingleton<DisposableTrack>(tracker);
             container.Dispose();
             Assert.AreEqual(1, tracker.DisposeCalls);
         }
 
         [TestMethod]
-        public void ContainerIgnoresNonDisposableItems()
+        public void ServiceCollectionIgnoresNonDisposableItems()
         {
-            Container container = new Container();
-            container.Register<int>(42);
+            ServiceCollection container = new ServiceCollection();
+            container.RegisterSingleton<int>(42);
             container.Dispose();
         }
 
@@ -165,21 +165,21 @@ namespace YasES.Core.Tests.UnitTests
         }
 
         [TestMethod]
-        public void ContainerResolvesToDerivedInterfacesIfTypeNotDirectlyFound()
+        public void ServiceCollectionResolvesToDerivedInterfacesIfTypeNotDirectlyFound()
         {
-            Container container = new Container();
+            ServiceCollection container = new ServiceCollection();
             SomeDerived checkInstance = new SomeDerived();
-            container.Register<IDerived>(checkInstance);
+            container.RegisterSingleton<IDerived>(checkInstance);
             IBase resolved = container.Resolve<IBase>();
             Assert.AreSame(checkInstance, resolved);
         }
 
         [TestMethod]
-        public void ContainerResolvesToDerivedClassesIfTypeNotDirectlyFound()
+        public void ServiceCollectionResolvesToDerivedClassesIfTypeNotDirectlyFound()
         {
-            Container container = new Container();
+            ServiceCollection container = new ServiceCollection();
             CDerived checkInstance = new CDerived();
-            container.Register<CDerived>(checkInstance);
+            container.RegisterSingleton<CDerived>(checkInstance);
             CBase resolved = container.Resolve<CBase>();
             Assert.AreSame(checkInstance, resolved);
         }

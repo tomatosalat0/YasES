@@ -10,8 +10,8 @@ namespace YasES.Persistance.InMemory
         private readonly Dictionary<StreamIdentifier, MessageListContainer> _streams = new Dictionary<StreamIdentifier, MessageListContainer>();
         private readonly HashSet<CommitId> _commitedIds = new HashSet<CommitId>();
         private readonly object _streamsLock = new object();
-        private long _nextSequenceId = 1;
         private readonly object _commitLock = new object();
+        private long _nextSequenceId = 1;
 
         public void Commit(CommitAttempt attempt)
         {
@@ -19,7 +19,7 @@ namespace YasES.Persistance.InMemory
                 throw new InvalidOperationException($"The stream identifier must point to a single stream");
 
             MessageListContainer container = OpenContainer(attempt.StreamIdentifier)[0];
-            lock(_commitLock)
+            lock (_commitLock)
             {
                 if (!_commitedIds.Add(attempt.CommitId))
                     return;
@@ -72,7 +72,7 @@ namespace YasES.Persistance.InMemory
                     return _streams.Values.ToList();
             }
 
-            lock(_streamsLock)
+            lock (_streamsLock)
             {
                 return identifiers.Distinct().SelectMany(OpenContainerUnlocked).Distinct().ToList();
             }
@@ -80,7 +80,7 @@ namespace YasES.Persistance.InMemory
 
         private List<MessageListContainer> OpenContainer(StreamIdentifier identifier)
         {
-            lock(_streamsLock)
+            lock (_streamsLock)
             {
                 return OpenContainerUnlocked(identifier);
             }
@@ -97,7 +97,8 @@ namespace YasES.Persistance.InMemory
                     _streams.Add(identifier, container);
                 }
                 result.Add(container);
-            } else
+            }
+            else
             {
                 result.AddRange(_streams
                     .Where(p => p.Key.BucketId == identifier.BucketId)

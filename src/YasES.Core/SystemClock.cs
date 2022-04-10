@@ -8,7 +8,7 @@ namespace YasES.Core
         /// The resolver for the system clock. Do not use the resolver
         /// directly, use <see cref="UtcNow"/>.
         /// </summary>
-        public static Func<DateTime> ResolveUtcNow = () => DateTime.UtcNow;
+        public static Func<DateTime> ResolveUtcNow { get; set; } = () => DateTime.UtcNow;
 
         /// <summary>
         /// Returns the system utc time.

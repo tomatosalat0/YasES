@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace YasES.Core.Tests.UnitTests
@@ -17,7 +18,7 @@ namespace YasES.Core.Tests.UnitTests
         {
             Assert.IsTrue(new CheckpointToken(1) < new CheckpointToken(2));
             Assert.IsFalse(new CheckpointToken(1) < new CheckpointToken(1));
-            
+
             Assert.IsTrue(new CheckpointToken(1) <= new CheckpointToken(2));
             Assert.IsTrue(new CheckpointToken(1) <= new CheckpointToken(1));
 
@@ -71,7 +72,7 @@ namespace YasES.Core.Tests.UnitTests
         {
             CheckpointToken id1 = new CheckpointToken(2);
             Assert.AreEqual(2L.GetHashCode(), id1.GetHashCode());
-            Assert.AreEqual(2L.ToString(), id1.ToString());
+            Assert.AreEqual(2L.ToString(CultureInfo.InvariantCulture), id1.ToString());
         }
 
         [TestMethod]

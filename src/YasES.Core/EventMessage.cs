@@ -19,7 +19,7 @@ namespace YasES.Core
             : this(eventName, DefaultHeaders, payload)
         {
         }
-        
+
         /// <inheritdoc/>
         public string EventName { get; }
 

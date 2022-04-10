@@ -50,7 +50,7 @@ namespace YasES.Plugins.Messaging.Tests.UnitTests
             int numberOfCalls = 0;
             object message = new object();
 
-            Queue queue = new Queue((m) => 
+            Queue queue = new Queue((m) =>
             {
                 Assert.AreSame(message, m.Payload);
                 numberOfCalls++;

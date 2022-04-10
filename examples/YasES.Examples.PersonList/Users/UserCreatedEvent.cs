@@ -28,7 +28,7 @@ namespace YasES.Examples.PersonList.Users
             {
                 [Obsolete()]
                 internal Payload()
-                {   
+                {
                 }
 
                 public Payload(Guid userId, string userName)

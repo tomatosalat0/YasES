@@ -6,7 +6,7 @@
     <members>
         <member name="P:YasES.Persistance.Sqlite.SqliteConfiguration.TableName">
             <summary>
-            Defines the name of the event store table within the database file. 
+            Defines the name of the event store table within the database file.
             Defaults to <c>Events</c>.
             </summary>
         </member>

@@ -104,18 +104,18 @@ VALUES (
 
         private void InsertEvents(IDbCommand command, CommitAttempt commit)
         {
-            IDbDataParameter bucketId = DefineParameter(command, "@BucketId", DbType.String );
-            IDbDataParameter streamId = DefineParameter(command, "@StreamId", DbType.String );
-            IDbDataParameter commitId = DefineParameter(command, "@CommitId", DbType.StringFixedLength );
+            IDbDataParameter bucketId = DefineParameter(command, "@BucketId", DbType.String);
+            IDbDataParameter streamId = DefineParameter(command, "@StreamId", DbType.String);
+            IDbDataParameter commitId = DefineParameter(command, "@CommitId", DbType.StringFixedLength);
             IDbDataParameter commitMessageIndex = DefineParameter(command, "@CommitMessageIndex", DbType.Int64);
-            IDbDataParameter commitCreationDate = DefineParameter(command, "@CommitCreationDate", DbType.DateTime );
-            IDbDataParameter eventCreationDate = DefineParameter(command, "@EventCreationDate", DbType.DateTime );
-            IDbDataParameter eventName = DefineParameter(command, "@EventName", DbType.String );
+            IDbDataParameter commitCreationDate = DefineParameter(command, "@CommitCreationDate", DbType.DateTime);
+            IDbDataParameter eventCreationDate = DefineParameter(command, "@EventCreationDate", DbType.DateTime);
+            IDbDataParameter eventName = DefineParameter(command, "@EventName", DbType.String);
             IDbDataParameter messageId = DefineParameter(command, "@MessageId", DbType.String);
             IDbDataParameter correlationId = DefineParameter(command, "@CorrelationId", DbType.String);
             IDbDataParameter causationId = DefineParameter(command, "@CausationId", DbType.String);
-            IDbDataParameter headers = DefineParameter(command, "@Headers", DbType.Binary );
-            IDbDataParameter payload = DefineParameter(command, "@Payload", DbType.Binary );
+            IDbDataParameter headers = DefineParameter(command, "@Headers", DbType.Binary);
+            IDbDataParameter payload = DefineParameter(command, "@Payload", DbType.Binary);
 
             bucketId.Value = commit.StreamIdentifier.BucketId;
             streamId.Value = commit.StreamIdentifier.StreamId;

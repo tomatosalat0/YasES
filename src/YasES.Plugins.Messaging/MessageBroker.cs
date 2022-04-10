@@ -39,7 +39,7 @@ namespace YasES.Plugins.Messaging
         {
             get
             {
-                lock(_channelsLock)
+                lock (_channelsLock)
                     return _channels.Count;
             }
         }
@@ -79,8 +79,10 @@ namespace YasES.Plugins.Messaging
             {
                 List<string> emptyChannels = new List<string>();
                 foreach (var pair in _channels)
+                {
                     if (pair.Value.IsEmpty)
                         emptyChannels.Add(pair.Key);
+                }
 
                 foreach (var channelName in emptyChannels)
                     _channels.Remove(channelName);

@@ -20,7 +20,7 @@ namespace YasES.Persistance.InMemory
 
         internal long Append(CommitAttempt attempt, long nextSequenceId)
         {
-            lock(_messagesLock)
+            lock (_messagesLock)
             {
                 DateTime commitTime = SystemClock.UtcNow;
                 foreach (var message in attempt.Messages)
@@ -36,7 +36,7 @@ namespace YasES.Persistance.InMemory
 
         internal IReadOnlyList<IStoredEventMessage> CreateSnapshot(Func<IStoredEventMessage, bool> predicate)
         {
-            lock(_messagesLock)
+            lock (_messagesLock)
             {
                 return _messages.Where(predicate).ToList();
             }

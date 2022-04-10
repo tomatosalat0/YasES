@@ -123,7 +123,7 @@ namespace YasES.Persistance.Sqlite
                 else
                     target.Add($"EventName NOT IN ({inStatement})");
             }
-            
+
             private static void FillCorrelationIdFilter(List<string> target, ReadPredicate predicate)
             {
                 if (predicate.CorrelationId == null)
@@ -150,7 +150,7 @@ namespace YasES.Persistance.Sqlite
                     if (all.Any(p => p.MatchesAllStreams))
                     {
                         orConditions.Add(bucketCondition);
-                    } 
+                    }
                     else
                     {
                         List<StreamIdentifier> exactMatch = all.Where(p => p.IsSingleStream).ToList();
@@ -212,7 +212,7 @@ namespace YasES.Persistance.Sqlite
                     Current = message;
                     _lastKnownCheckpointOffset = message.Checkpoint.Value;
                     return true;
-                } 
+                }
                 else
                 {
                     if (_pageReader.TryReadNext(out message))

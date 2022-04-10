@@ -4,6 +4,12 @@
         <name>YasES.Core</name>
     </assembly>
     <members>
+        <member name="T:YasES.Core.CausationEventCollector">
+            <summary>
+            All collected events will get the defined causation id set in their
+            header. If a causation id is already set, it won't get adjusted.
+            </summary>
+        </member>
         <member name="F:YasES.Core.CheckpointToken.Beginning">
             <summary>
             Defines the first checkpoint token of the persistance store.
@@ -17,8 +23,7 @@
         <member name="T:YasES.Core.CorrelationEventCollector">
             <summary>
             All collected events will get the defined correlation id set in their
-            header. If a passed event already contains a correlation id, an exception
-            is thrown if the correlation id are not equal.
+            header. If a correlation id is already set, it won't get adjusted.
             </summary>
         </member>
         <member name="T:YasES.Core.EventCollector">
@@ -47,7 +52,7 @@
         </member>
         <member name="M:YasES.Core.EventCollector.BuildCommit(YasES.Core.StreamIdentifier,YasES.Core.CommitId)">
             <summary>
-            Collects all previously added messages and adds them to a single 
+            Collects all previously added messages and adds them to a single
             <see cref="T:YasES.Core.CommitAttempt"/>. You can only call this method once.
             </summary>
         </member>
@@ -88,7 +93,7 @@
         </member>
         <member name="M:YasES.Core.IEventCollector.BuildCommit(YasES.Core.StreamIdentifier,YasES.Core.CommitId)">
             <summary>
-            Collects all previously added messages and adds them to a single 
+            Collects all previously added messages and adds them to a single
             <see cref="T:YasES.Core.CommitAttempt"/>. You can only call this method once.
             </summary>
         </member>
@@ -113,7 +118,7 @@
         </member>
         <member name="P:YasES.Core.IEventMessage.EventName">
             <summary>
-            Defines the name of the event. 
+            Defines the name of the event.
             </summary>
         </member>
         <member name="P:YasES.Core.IEventMessage.Headers">
@@ -138,7 +143,7 @@
         </member>
         <member name="M:YasES.Core.IEventReadExtensions.ReadForwardFromTo(YasES.Core.IEventRead,YasES.Core.StreamIdentifier,YasES.Core.CheckpointToken,YasES.Core.CheckpointToken)">
             <summary>
-            Returns a reader for the <paramref name="stream"/>, starting at <paramref name="lowerBoundExclusive"/> going to the future. 
+            Returns a reader for the <paramref name="stream"/>, starting at <paramref name="lowerBoundExclusive"/> going to the future.
             The reader will end as soon as <paramref name="upperBoundExclusive"/> has been returned or no more messages
             could be found inside the store.
             </summary>
@@ -183,7 +188,7 @@
         </member>
         <member name="T:YasES.Core.ReadPredicate">
             <summary>
-            Defines the operation and conditions to execute when reading from 
+            Defines the filters to apply when reading from
             the event store. Note that a single stream predicate can not
             request streams from multiple buckets simultaniously.
             </summary>
@@ -191,37 +196,38 @@
         <member name="P:YasES.Core.ReadPredicate.Streams">
             <summary>
             The streams to return within this request. Note that
-            all streams will be in the same bucket.
+            all streams must be in the same bucket.
             </summary>
         </member>
         <member name="P:YasES.Core.ReadPredicate.Reverse">
             <summary>
-            True if the events should get returned in the reverse 
-            order they were created. If false, the events should
+            True if the events get returned in the reverse
+            order they were created. If false, the events
             get returned in the order they where added to the streams.
             </summary>
         </member>
         <member name="P:YasES.Core.ReadPredicate.EventNamesFilter">
             <summary>
-            Optional: if null, no filtering based on the event
-            names should happen. If set, the list will 
-            contain the exact event names to filter by. 
+            Optional: if null, no filtering based on the <see cref="P:YasES.Core.IEventMessage.EventName"/>
+            will happen. If set, the list will
+            contain the exact event names to filter by.
             See <see cref="P:YasES.Core.ReadPredicate.EventNamesIncluding"/> if the
             filter is "include" or "exclude".
             </summary>
         </member>
         <member name="P:YasES.Core.ReadPredicate.EventNamesIncluding">
             <summary>
-            If true, only the events defined in <see cref="P:YasES.Core.ReadPredicate.EventNamesFilter"/>
-            should be included in the result. If false, all events
-            exect those having one of the specified names in <see cref="P:YasES.Core.ReadPredicate.EventNamesFilter"/>
-            should be returned.
+            If true, only the events where <see cref="P:YasES.Core.IEventMessage.EventName"/> is in <see cref="P:YasES.Core.ReadPredicate.EventNamesFilter"/>
+            are included in the result. If false, all events
+            except those having <see cref="P:YasES.Core.IEventMessage.EventName"/> in <see cref="P:YasES.Core.ReadPredicate.EventNamesFilter"/>
+            are be returned.
             </summary>
         </member>
         <member name="P:YasES.Core.ReadPredicate.CorrelationId">
             <summary>
             Optional: if null, this property will get ignored. If defined,
-            only events having the specified correlationId in their header should
+            only events having the same correlation id (specified by the key
+            <see cref="F:YasES.Core.CommonMetaData.CorrelationId"/> within <see cref="P:YasES.Core.IEventMessage.Headers"/>)
             get returned.
             </summary>
         </member>
@@ -239,10 +245,181 @@
             will get returned. The highest value will be <see cref="F:YasES.Core.CheckpointToken.Ending"/>.
             </summary>
         </member>
+        <member name="M:YasES.Core.ReadPredicateBuilder.Forwards(YasES.Core.StreamIdentifier)">
+            <summary>
+            Returns all events which match the specified <paramref name="identifier"/>.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.ReadPredicateBuilder.Forwards(YasES.Core.StreamIdentifier,YasES.Core.StreamIdentifier[])">
+            <summary>
+            Returns all events which match one of the specified <paramref name="identifier"/>.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.ReadPredicateBuilder.Backwards(YasES.Core.StreamIdentifier)">
+            <summary>
+            Returns all events which match the specified <paramref name="identifier"/> in the reverse creation
+            order.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.ReadPredicateBuilder.Backwards(YasES.Core.StreamIdentifier,YasES.Core.StreamIdentifier[])">
+            <summary>
+            Returns all events which match one of the specified <paramref name="identifier"/> in the reverse creation
+            order.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.ReadPredicateBuilder.IAfterInit.FromStream(YasES.Core.StreamIdentifier)">
+            <summary>
+            Returns events where the stream id matches <paramref name="identifier"/>.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.ReadPredicateBuilder.IAfterInit.FromStreams(System.Collections.Generic.IEnumerable{YasES.Core.StreamIdentifier})">
+            <summary>
+            Returns events where the stream id matches any of the provided <paramref name="identifiers"/>.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.ReadPredicateBuilder.IAfterInit.FromStreams(YasES.Core.StreamIdentifier[])">
+            <summary>
+            Returns events where the stream id matches any of the provided <paramref name="identifiers"/>.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.ReadPredicateBuilder.IAfterStreams.ReadForwards">
+            <summary>
+            The events are returned in the order they were commited.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.ReadPredicateBuilder.IAfterStreams.ReadBackwards">
+            <summary>
+            The events are returned in the reverse order they were commited.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.ReadPredicateBuilder.IAfterDirection.IncludeAllEvents">
+            <summary>
+            No filtering in <see cref="P:YasES.Core.IEventMessage.EventName"/> will get used.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.ReadPredicateBuilder.IAfterDirection.OnlyIncluding(System.Collections.Generic.IReadOnlySet{System.String})">
+            <summary>
+            Only events where <see cref="P:YasES.Core.IEventMessage.EventName"/> is within the provided set
+            of allowed <paramref name="eventNames"/>.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.ReadPredicateBuilder.IAfterDirection.AllExcluding(System.Collections.Generic.IReadOnlySet{System.String})">
+            <summary>
+            Only events where <see cref="P:YasES.Core.IEventMessage.EventName"/> is not within the provided set
+            of <paramref name="excludingNames"/>.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.ReadPredicateBuilder.IAfterEventFilter.HavingTheCorrelationId(System.String)">
+            <summary>
+            Only include events where the <see cref="P:YasES.Core.IEventMessage.Headers"/> contains a <see cref="F:YasES.Core.CommonMetaData.CorrelationId"/>
+            and the value inside that header is equal to <paramref name="correlationId"/>.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.ReadPredicateBuilder.IAfterEventFilter.WithoutCheckpointLimit">
+            <summary>
+            No further filtering is used.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.ReadPredicateBuilder.IAfterEventFilter.RaisedAfterCheckpoint(YasES.Core.CheckpointToken)">
+            <summary>
+            Only events which where saved after the provided <paramref name="token"/> are returned.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.ReadPredicateBuilder.IAfterEventFilter.RaisedBeforeCheckpoint(YasES.Core.CheckpointToken)">
+            <summary>
+            Only events which where saved before the provided <paramref name="token"/> are returned.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.ReadPredicateBuilder.IAfterEventFilter.RaisedBetweenCheckpoints(YasES.Core.CheckpointToken,YasES.Core.CheckpointToken)">
+            <summary>
+            Only events which where saved between the <paramref name="lowerBoundExclusive"/> and <paramref name="upperBoundExclusive"/>.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.ReadPredicateBuilder.ICompleted.Build">
+            <summary>
+            Create the <see cref="T:YasES.Core.ReadPredicate"/> which can get passed to <see cref="M:YasES.Core.IEventRead.Read(YasES.Core.ReadPredicate)"/>.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.IAfterInitExtensions.FromAllStreamsInBucket(YasES.Core.ReadPredicateBuilder.IAfterInit,System.String)">
+            <summary>
+            Include all events of all streams which are within the provided <paramref name="bucketId"/>.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.IAfterDirectionExtensions.OnlyIncluding(YasES.Core.ReadPredicateBuilder.IAfterDirection,System.String)">
+            <summary>
+            Only events where <see cref="P:YasES.Core.IEventMessage.EventName"/> is equal to <paramref name="eventName"/> are returned.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.IAfterDirectionExtensions.OnlyIncluding(YasES.Core.ReadPredicateBuilder.IAfterDirection,System.String,System.String[])">
+            <summary>
+            Only events where <see cref="P:YasES.Core.IEventMessage.EventName"/> is equal to one of <paramref name="eventName"/> are returned.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.IAfterDirectionExtensions.AllExcluding(YasES.Core.ReadPredicateBuilder.IAfterDirection,System.String)">
+            <summary>
+            Only events where <see cref="P:YasES.Core.IEventMessage.EventName"/> is not equal to <paramref name="eventName"/> are returned.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.IAfterDirectionExtensions.AllExcluding(YasES.Core.ReadPredicateBuilder.IAfterDirection,System.String,System.String[])">
+            <summary>
+            Only events where <see cref="P:YasES.Core.IEventMessage.EventName"/> is not equal to one of the <paramref name="eventName"/> are returned.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.ServiceCollection.RegisterSingleton``2(System.Func{YasES.Core.ServiceCollection,``1,``0})">
+            <summary>
+            Register a service of the provided <typeparamref name="TService"/> which depends on <typeparamref name="TDependsOn"/>.
+            The factory result will be kept in memory for the lifetime of the service collection.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.ServiceCollection.RegisterSingleton``1(System.Func{YasES.Core.ServiceCollection,``0})">
+            <summary>
+            Register a service of the provided <typeparamref name="TService"/>.
+            The factory result will be kept in memory for the lifetime of the service collection.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.ServiceCollection.RegisterTransient``1(System.Func{YasES.Core.ServiceCollection,``0})">
+            <summary>
+            Register a service of the provided <typeparamref name="TService"/>.
+            Each time "Resolve" with the same type is called, the provided <paramref name="factory"/>
+            method will be called. The result instance will not be saved within the service collection.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.ServiceCollection.Resolve``1">
+            <summary>
+            Returns an instance of the provided <typeparamref name="TService"/>.
+            </summary>
+            <exception cref="T:System.InvalidOperationException">Is thrown if <typeparamref name="TService"/> is not a registered type.</exception>
+        </member>
+        <member name="M:YasES.Core.ServiceCollection.Resolve(System.Type)">
+            <summary>
+            Returns an instance of the provided <paramref name="serviceType"/>.
+            </summary>
+            <exception cref="T:System.InvalidOperationException">Is thrown if <paramref name="serviceType"/> is not a registered type.</exception>
+        </member>
+        <member name="M:YasES.Core.ServiceCollection.ResolveOrDefault``1(``0)">
+            <summary>
+            Returns an instance of the provided <typeparamref name="TService"/>. If no service is registed, <paramref name="default"/>
+            will get returned.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.ServiceCollection.ResolveOrDefault(System.Type,System.Object)">
+            <summary>
+            Returns an instance of the provided <paramref name="serviceType"/>. If no service is registed, <paramref name="default"/>
+            will get returned.
+            </summary>
+        </member>
+        <member name="M:YasES.Core.ServiceCollection.Registration.DestroyFactory">
+            <summary>
+            memory optimization: when the factory isn't needed anymore,
+            remove the reference to the action so it can get collected
+            by the GC. A factory action might held references which are
+            not needed anymore.
+            </summary>
+        </member>
         <member name="M:YasES.Core.StreamIdentifier.SingleStream(System.String,System.String)">
             <summary>
             Creates a stream identifier which points to exactly one stream. The
-            stream is defined by <paramref name="streamId"/>. 
+            stream is defined by <paramref name="streamId"/>.
             <paramref name="bucketId"/> and <paramref name="streamId"/> are case sensitive.
             </summary>
         </member>
@@ -291,7 +468,7 @@
             Returns true if the current identifier matches <paramref name="other"/>.
             </summary>
         </member>
-        <member name="F:YasES.Core.SystemClock.ResolveUtcNow">
+        <member name="P:YasES.Core.SystemClock.ResolveUtcNow">
             <summary>
             The resolver for the system clock. Do not use the resolver
             directly, use <see cref="P:YasES.Core.SystemClock.UtcNow"/>.

@@ -2,24 +2,41 @@
 
 namespace YasES.Core
 {
+#pragma warning disable CA1001 // Types that own disposable fields should be disposable (_services is passed to DefaultEventStore inside Build()
     public class EventStoreBuilder
+#pragma warning restore CA1001 // Types that own disposable fields should be disposable
     {
-        private readonly Container _container = new Container();
+        private readonly ServiceCollection _services = new ServiceCollection();
+        private readonly EventStoreBuilder? _parent;
 
         public static EventStoreBuilder Init()
         {
             return new EventStoreBuilder();
         }
 
-        public virtual EventStoreBuilder ConfigureContainer(Action<Container> handler)
+        internal EventStoreBuilder()
         {
-            handler(_container);
+        }
+
+        public EventStoreBuilder(EventStoreBuilder parent)
+        {
+            _parent = parent;
+        }
+
+        public virtual EventStoreBuilder ConfigureServices(Action<ServiceCollection> handler)
+        {
+            if (_parent != null)
+                _parent.ConfigureServices(handler);
+            else
+                handler(_services);
             return this;
         }
 
         public virtual IEventStore Build()
         {
-            return new DefaultEventStore(_container);
+            if (_parent != null)
+                return _parent.Build();
+            return new DefaultEventStore(_services);
         }
     }
 }
