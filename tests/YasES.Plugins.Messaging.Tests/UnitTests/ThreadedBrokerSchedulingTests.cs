@@ -74,11 +74,11 @@ namespace YasES.Plugins.Messaging.Tests.UnitTests
             {
             }
 
-            public virtual bool WaitForMessages(int millisecondsTimeout, CancellationToken cancellationToken)
+            public virtual bool WaitForMessages(TimeSpan timeout, CancellationToken cancellationToken)
             {
                 if (cancellationToken.CanBeCanceled)
                 {
-                    cancellationToken.WaitHandle.WaitOne(millisecondsTimeout);
+                    cancellationToken.WaitHandle.WaitOne(timeout);
                     cancellationToken.ThrowIfCancellationRequested();
                 }
                 return false;
@@ -87,7 +87,7 @@ namespace YasES.Plugins.Messaging.Tests.UnitTests
 
         private class NoWaitScheduling : NullScheduling
         {
-            public override bool WaitForMessages(int millisecondsTimeout, CancellationToken cancellationToken)
+            public override bool WaitForMessages(TimeSpan timeout, CancellationToken cancellationToken)
             {
                 return false;
             }
@@ -108,7 +108,7 @@ namespace YasES.Plugins.Messaging.Tests.UnitTests
             {
             }
 
-            public bool WaitForMessages(int millisecondsTimeout, CancellationToken cancellationToken)
+            public bool WaitForMessages(TimeSpan timeout, CancellationToken cancellationToken)
             {
                 return HasMessages;
             }
@@ -135,7 +135,7 @@ namespace YasES.Plugins.Messaging.Tests.UnitTests
             {
             }
 
-            public bool WaitForMessages(int millisecondsTimeout, CancellationToken cancellationToken)
+            public bool WaitForMessages(TimeSpan timeout, CancellationToken cancellationToken)
             {
                 return HasMessage;
             }

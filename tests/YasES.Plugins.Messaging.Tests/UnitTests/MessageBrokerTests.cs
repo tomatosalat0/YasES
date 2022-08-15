@@ -20,28 +20,20 @@ namespace YasES.Plugins.Messaging.Tests.UnitTests
         }
 
         [TestMethod]
-        public void MessageBrokerDoesntAllowNullOrEmptyChannelNames()
-        {
-            using MessageBroker broker = new MessageBroker((b) => new ManualBrokerScheduler(b) as IDisposable);
-            Assert.ThrowsException<ArgumentException>(() => broker.Channel(null));
-            Assert.ThrowsException<ArgumentException>(() => broker.Channel(string.Empty));
-        }
-
-        [TestMethod]
         public void DisposedMessageBrokerThrowsDisposedException()
         {
             MessageBroker broker = new MessageBroker((b) => new ManualBrokerScheduler(b) as IDisposable);
             broker.Dispose();
 
-            Assert.ThrowsException<ObjectDisposedException>(() => broker.Channel("Topic"));
-            Assert.ThrowsException<ObjectDisposedException>(() => broker.Publish(new object(), "Topic"));
+            Assert.ThrowsException<ObjectDisposedException>(() => broker.Channel(new TopicName("Topic")));
+            Assert.ThrowsException<ObjectDisposedException>(() => broker.Publish(new object(), new TopicName("Topic")));
         }
 
         [TestMethod]
         public void MessageBrokerThrowsExceptionWhenPublishGetsNull()
         {
             using MessageBroker broker = new MessageBroker((b) => new ManualBrokerScheduler(b) as IDisposable);
-            Assert.ThrowsException<ArgumentNullException>(() => broker.Publish<object>(null, "Topic"));
+            Assert.ThrowsException<ArgumentNullException>(() => broker.Publish<object>(null, new TopicName("Topic")));
             Assert.ThrowsException<ArgumentNullException>(() => broker.Publish<object>(new object(), null));
         }
 
@@ -49,8 +41,8 @@ namespace YasES.Plugins.Messaging.Tests.UnitTests
         public void MessageBrokerReturnsSameChannelIfAlreadyExists()
         {
             using MessageBroker broker = new MessageBroker((b) => new ManualBrokerScheduler(b) as IDisposable);
-            IChannel channel1 = broker.Channel("MyChannel");
-            IChannel channel2 = broker.Channel("MyChannel");
+            IChannel channel1 = broker.Channel(new TopicName("MyChannel"));
+            IChannel channel2 = broker.Channel(new TopicName("MyChannel"));
             Assert.AreSame(channel1, channel2);
         }
 
@@ -69,7 +61,7 @@ namespace YasES.Plugins.Messaging.Tests.UnitTests
         {
             ManualBrokerScheduler scheduler = null;
             using MessageBroker broker = new MessageBroker(b => (scheduler = new ManualBrokerScheduler(b)) as IDisposable);
-            Assert.IsFalse(scheduler.WaitForMessages(200));
+            Assert.IsFalse(scheduler.WaitForMessages(TimeSpan.FromMilliseconds(200)));
         }
 
         [TestMethod]
@@ -77,9 +69,9 @@ namespace YasES.Plugins.Messaging.Tests.UnitTests
         {
             ManualBrokerScheduler scheduler = null;
             using MessageBroker broker = new MessageBroker(b => (scheduler = new ManualBrokerScheduler(b)) as IDisposable);
-            broker.Channel("Topic").Subscribe<object>((_) => { });
-            broker.Publish<object>(new object(), "Topic");
-            Assert.IsTrue(scheduler.WaitForMessages(200));
+            broker.Channel(new TopicName("Topic")).Subscribe<object>((_) => { });
+            broker.Publish<object>(new object(), new TopicName("Topic"));
+            Assert.IsTrue(scheduler.WaitForMessages(TimeSpan.FromMilliseconds(200)));
         }
 
         [TestMethod]
@@ -87,9 +79,9 @@ namespace YasES.Plugins.Messaging.Tests.UnitTests
         {
             ManualBrokerScheduler scheduler = null;
             using MessageBroker broker = new MessageBroker(b => (scheduler = new ManualBrokerScheduler(b)) as IDisposable);
-            IChannel channel1 = broker.Channel("Topic");
+            IChannel channel1 = broker.Channel(new TopicName("Topic"));
             scheduler.RemoveEmptyChannels();
-            IChannel channel2 = broker.Channel("Topic");
+            IChannel channel2 = broker.Channel(new TopicName("Topic"));
             Assert.AreNotSame(channel1, channel2);
         }
 
@@ -98,11 +90,11 @@ namespace YasES.Plugins.Messaging.Tests.UnitTests
         {
             ManualBrokerScheduler scheduler = null;
             using MessageBroker broker = new MessageBroker(b => (scheduler = new ManualBrokerScheduler(b)) as IDisposable);
-            IChannel channel1 = broker.Channel("Topic");
+            IChannel channel1 = broker.Channel(new TopicName("Topic"));
             channel1.Subscribe<object>((_) => { });
 
             scheduler.RemoveEmptyChannels();
-            IChannel channel2 = broker.Channel("Topic");
+            IChannel channel2 = broker.Channel(new TopicName("Topic"));
             Assert.AreSame(channel1, channel2);
         }
 
@@ -111,10 +103,10 @@ namespace YasES.Plugins.Messaging.Tests.UnitTests
         {
             ManualBrokerScheduler scheduler = null;
             using MessageBroker broker = new MessageBroker(b => (scheduler = new ManualBrokerScheduler(b)) as IDisposable);
-            IChannel channel1 = broker.Channel("Topic");
-            broker.Publish<object>(new object(), "Topic");
+            IChannel channel1 = broker.Channel(new TopicName("Topic"));
+            broker.Publish<object>(new object(), new TopicName("Topic"));
             scheduler.RemoveEmptyChannels();
-            IChannel channel2 = broker.Channel("Topic");
+            IChannel channel2 = broker.Channel(new TopicName("Topic"));
             Assert.AreNotSame(channel1, channel2);
         }
 
@@ -123,10 +115,10 @@ namespace YasES.Plugins.Messaging.Tests.UnitTests
         {
             ManualBrokerScheduler scheduler = null;
             using MessageBroker broker = new MessageBroker(b => (scheduler = new ManualBrokerScheduler(b)) as IDisposable);
-            IChannel channel1 = broker.Channel("Topic");
+            IChannel channel1 = broker.Channel(new TopicName("Topic"));
             scheduler.RemoveEmptyChannels();
 
-            broker.Publish<object>(new object(), "Topic");
+            broker.Publish<object>(new object(), new TopicName("Topic"));
             Assert.AreEqual(0, broker.ActiveChannels);
         }
 
@@ -135,7 +127,7 @@ namespace YasES.Plugins.Messaging.Tests.UnitTests
         {
             ManualBrokerScheduler scheduler = null;
             using MessageBroker broker = new MessageBroker(b => (scheduler = new ManualBrokerScheduler(b)) as IDisposable);
-            broker.Channel("Topic").Subscribe<object>((_) => { });
+            broker.Channel(new TopicName("Topic")).Subscribe<object>((_) => { });
             Assert.AreEqual(1, broker.ActiveChannels);
         }
 
@@ -154,9 +146,9 @@ namespace YasES.Plugins.Messaging.Tests.UnitTests
             using MessageBroker broker = new MessageBroker(b => (scheduler = new ManualBrokerScheduler(b)) as IDisposable);
 
             int numberOfCalls = 0;
-            broker.Channel("Topic").Subscribe<object>((_) => numberOfCalls++);
-            broker.Publish(new object(), "Topic");
-            broker.Publish(new object(), "Topic");
+            broker.Channel(new TopicName("Topic")).Subscribe<object>((_) => numberOfCalls++);
+            broker.Publish(new object(), new TopicName("Topic"));
+            broker.Publish(new object(), new TopicName("Topic"));
 
             Assert.AreEqual(1, scheduler.CallSubscribers());
             Assert.AreEqual(1, numberOfCalls);
@@ -169,9 +161,9 @@ namespace YasES.Plugins.Messaging.Tests.UnitTests
             using MessageBroker broker = new MessageBroker(b => (scheduler = new ManualBrokerScheduler(b)) as IDisposable);
 
             int numberOfCalls = 0;
-            broker.Channel("Topic").Subscribe((_) => numberOfCalls++);
-            broker.Publish(new object(), "Topic");
-            broker.Publish(new object(), "Topic");
+            broker.Channel(new TopicName("Topic")).Subscribe((_) => numberOfCalls++);
+            broker.Publish(new object(), new TopicName("Topic"));
+            broker.Publish(new object(), new TopicName("Topic"));
 
             Assert.AreEqual(2, scheduler.Drain());
             Assert.AreEqual(2, numberOfCalls);

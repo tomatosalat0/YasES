@@ -11,13 +11,13 @@ namespace YasES.Plugins.Messaging.Tests.IntegrationTests
         [TestMethod]
         public void GlobalCommitCompleteEventGetsRaisedAfterConfigure()
         {
-            const string TopicName = "EventStore/AfterCommit";
+            TopicName topicName = TopicName.Build("EventStore", "AfterCommit");
 
             ManualBrokerScheduler manual = null;
             using IEventStore eventStore = EventStoreBuilder.Init()
                 .UseInMemoryPersistance()
                 .UseMessageBroker((c) => (manual = new ManualBrokerScheduler(c)) as IDisposable)
-                .NotifyAfterCommit(TopicName)
+                .NotifyAfterCommit(topicName)
                 .Build();
             IMessageBroker broker = eventStore.Services.Resolve<IMessageBroker>();
 
@@ -25,7 +25,7 @@ namespace YasES.Plugins.Messaging.Tests.IntegrationTests
             int numberOfCalls = 0;
             DateTime mockTime = new DateTime(2000, 10, 10, 10, 10, 10, DateTimeKind.Utc);
 
-            broker.Channel(TopicName).Subscribe<AfterCommitEvent>((message) =>
+            broker.Channel(topicName).Subscribe<AfterCommitEvent>((message) =>
             {
                 Assert.AreSame(commit, message.Payload.Attempt);
                 Assert.AreEqual(mockTime, message.Payload.EventRaisedUtc);

@@ -38,18 +38,28 @@ namespace YasES.Persistance.InMemory
                 ? iterator.Backward(predicate.LowerExclusiveBound, predicate.UpperExclusiveBound)
                 : iterator.Forward(predicate.LowerExclusiveBound, predicate.UpperExclusiveBound);
 
-            if (predicate.EventNamesFilter != null)
-            {
-                messages = predicate.EventNamesIncluding
-                    ? messages.Where(p => predicate.EventNamesFilter.Contains(p.EventName))
-                    : messages.Where(p => !predicate.EventNamesFilter.Contains(p.EventName));
-            }
-            if (predicate.CorrelationId != null)
-            {
-                messages = messages.Where(p => predicate.CorrelationId == p.Headers.GetValueOrDefault(CommonMetaData.CorrelationId) as string);
-            }
+            messages = ApplyEventNamesfilter(predicate, messages);
+            messages = ApplyCorrelationIdFileter(predicate, messages);
 
             return messages;
+        }
+
+        private IEnumerable<IStoredEventMessage> ApplyEventNamesfilter(ReadPredicate predicate, IEnumerable<IStoredEventMessage> messages)
+        {
+            if (predicate.EventNamesFilter == null)
+                return messages;
+
+            return predicate.EventNamesIncluding
+                    ? messages.Where(p => predicate.EventNamesFilter.Contains(p.EventName))
+                    : messages.Where(p => !predicate.EventNamesFilter.Contains(p.EventName));
+        }
+
+        private IEnumerable<IStoredEventMessage> ApplyCorrelationIdFileter(ReadPredicate predicate, IEnumerable<IStoredEventMessage> messages)
+        {
+            if (predicate.CorrelationId == null)
+                return messages;
+
+            return messages.Where(p => predicate.CorrelationId == p.GetCorrelationIdOrDefault());
         }
 
         private MessageListIterator? PrepareIterator(IReadOnlyList<StreamIdentifier> streams)

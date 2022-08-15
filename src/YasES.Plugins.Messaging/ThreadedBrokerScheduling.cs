@@ -6,7 +6,7 @@ using System.Threading;
 namespace YasES.Plugins.Messaging
 {
     /// <summary>
-    /// This scheduler will call the <see cref="IBrokerCommands"/> from different in the background.
+    /// This scheduler will call the <see cref="IBrokerCommands"/> in the background.
     /// This way all events will get forwarded to each subscriber automatically.
     /// </summary>
     public class ThreadedBrokerScheduling : IDisposable
@@ -55,7 +55,7 @@ namespace YasES.Plugins.Messaging
         {
             while (!_cancellationTokenSource.IsCancellationRequested)
             {
-                if (_scheduling.WaitForMessages(millisecondsTimeout: 5000, _cancellationTokenSource.Token))
+                if (_scheduling.WaitForMessages(timeout: TimeSpan.FromSeconds(5), _cancellationTokenSource.Token))
                     WorkerThreadWakeup();
                 else
                     WorkerThreadCleanup();

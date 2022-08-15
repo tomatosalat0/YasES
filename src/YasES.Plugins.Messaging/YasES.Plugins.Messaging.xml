@@ -4,9 +4,9 @@
         <name>YasES.Plugins.Messaging</name>
     </assembly>
     <members>
-        <member name="M:YasES.Plugins.Messaging.IBrokerCommands.WaitForMessages(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:YasES.Plugins.Messaging.IBrokerCommands.WaitForMessages(System.TimeSpan,System.Threading.CancellationToken)">
             <summary>
-            Waits for the <paramref name="millisecondsTimeout"/> or until a new message might
+            Waits for the <paramref name="timeout"/> or until a new message might
             be ready for sending. Returns true if a message might be ready, otherwise false.
             </summary>
             <exception cref="T:System.Threading.Tasks.TaskCanceledException">Is thrown if <paramref name="cancellationToken"/> is canceled.</exception>
@@ -35,13 +35,13 @@
             The payload of the message.
             </summary>
         </member>
-        <member name="M:YasES.Plugins.Messaging.IMessageBroker.Channel(System.String)">
+        <member name="M:YasES.Plugins.Messaging.IMessageBroker.Channel(YasES.Plugins.Messaging.TopicName)">
             <summary>
             Creates or opens the channel with the provided <paramref name="topic"/>.
             If the channel has not been used it, it will get created automatically.
             </summary>
         </member>
-        <member name="M:YasES.Plugins.Messaging.IMessageBroker.Publish``1(``0,System.Collections.Generic.IEnumerable{System.String})">
+        <member name="M:YasES.Plugins.Messaging.IMessageBroker.Publish``1(``0,System.Collections.Generic.IEnumerable{YasES.Plugins.Messaging.TopicName})">
             <summary>
             Publishes the provided <paramref name="message"/> to all
             channels specified in <paramref name="topics"/>. If a channel
@@ -112,7 +112,7 @@
         </member>
         <member name="M:YasES.Plugins.Messaging.ManualBrokerScheduler.Drain">
             <summary>
-            Executes all subscripbers until the
+            Executes all subscripbers until
             all queues are empty. Returns the number
             of messages which has been sent in total.
             </summary>
@@ -140,7 +140,7 @@
         </member>
         <member name="T:YasES.Plugins.Messaging.ThreadedBrokerScheduling">
             <summary>
-            This scheduler will call the <see cref="T:YasES.Plugins.Messaging.IBrokerCommands"/> from different in the background.
+            This scheduler will call the <see cref="T:YasES.Plugins.Messaging.IBrokerCommands"/> in the background.
             This way all events will get forwarded to each subscriber automatically.
             </summary>
         </member>
@@ -159,7 +159,7 @@
             The returned object allows to add automatic event creation.
             </summary>
         </member>
-        <member name="M:YasES.Core.NotificationEventStoreBuilder.NotifyAfterCommit(System.String)">
+        <member name="M:YasES.Core.NotificationEventStoreBuilder.NotifyAfterCommit(YasES.Plugins.Messaging.TopicName)">
             <summary>
             After every successful <see cref="M:YasES.Core.IEventWrite.Commit(YasES.Core.CommitAttempt)"/>,
             a message wihtin the <see cref="T:YasES.Plugins.Messaging.IMessageBroker"/> gets published. The topic
@@ -168,7 +168,7 @@
             </summary>
             <exception cref="T:System.ArgumentException">Is thrown if <paramref name="topicName"/> is null or empty or whitespace only.</exception>
         </member>
-        <member name="M:YasES.Core.NotificationEventStoreBuilder.NotifyAfterCommitForStream(YasES.Core.StreamIdentifier,System.String)">
+        <member name="M:YasES.Core.NotificationEventStoreBuilder.NotifyAfterCommitForStream(YasES.Core.StreamIdentifier,YasES.Plugins.Messaging.TopicName)">
             <summary>
             After an successful call to <see cref="M:YasES.Core.IEventWrite.Commit(YasES.Core.CommitAttempt)"/> and
             the commited stream matches the provided <paramref name="streamIdentifier"/>

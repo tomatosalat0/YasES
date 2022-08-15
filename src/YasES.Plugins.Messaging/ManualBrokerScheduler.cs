@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 
 namespace YasES.Plugins.Messaging
 {
@@ -17,9 +18,9 @@ namespace YasES.Plugins.Messaging
             _scheduling = scheduling;
         }
 
-        public bool WaitForMessages(int millisecondsTimeout, CancellationToken token = default)
+        public bool WaitForMessages(TimeSpan timeout, CancellationToken token = default)
         {
-            return _scheduling.WaitForMessages(millisecondsTimeout, token);
+            return _scheduling.WaitForMessages(timeout, token);
         }
 
         public void RemoveEmptyChannels()
@@ -37,7 +38,7 @@ namespace YasES.Plugins.Messaging
         }
 
         /// <summary>
-        /// Executes all subscripbers until the
+        /// Executes all subscripbers until
         /// all queues are empty. Returns the number
         /// of messages which has been sent in total.
         /// </summary>

@@ -7,7 +7,7 @@ namespace YasES.Plugins.Messaging
 {
     internal class MessageBroker : IMessageBroker, IBrokerCommands
     {
-        private readonly Dictionary<string, Channel> _channels = new Dictionary<string, Channel>();
+        private readonly Dictionary<TopicName, Channel> _channels = new Dictionary<TopicName, Channel>();
         private readonly object _channelsLock = new object();
         private readonly BlockingCollection<object> _wakeUpNotifications = new BlockingCollection<object>();
         private readonly IDisposable? _schedulingHandle;
@@ -19,10 +19,8 @@ namespace YasES.Plugins.Messaging
             _schedulingHandle = initialization(this);
         }
 
-        public IChannel Channel(string topic)
+        public IChannel Channel(TopicName topic)
         {
-            if (string.IsNullOrEmpty(topic)) throw new ArgumentException($"'{nameof(topic)}' cannot be null or empty.", nameof(topic));
-
             ThrowDisposed();
             lock (_channelsLock)
             {
@@ -44,7 +42,7 @@ namespace YasES.Plugins.Messaging
             }
         }
 
-        public IMessageBroker Publish<T>(T message, IEnumerable<string> topics)
+        public IMessageBroker Publish<T>(T message, IEnumerable<TopicName> topics)
         {
             if (message is null) throw new ArgumentNullException(nameof(message));
             if (topics is null) throw new ArgumentNullException(nameof(topics));
@@ -68,16 +66,16 @@ namespace YasES.Plugins.Messaging
             _wakeUpNotifications.Add(new object());
         }
 
-        bool IBrokerCommands.WaitForMessages(int millisecondsTimeout, CancellationToken cancellationToken)
+        bool IBrokerCommands.WaitForMessages(TimeSpan timeout, CancellationToken cancellationToken)
         {
-            return _wakeUpNotifications.TryTake(out var _, millisecondsTimeout, cancellationToken);
+            return _wakeUpNotifications.TryTake(out var _, (int)timeout.TotalMilliseconds, cancellationToken);
         }
 
         void IBrokerCommands.RemoveEmptyChannels()
         {
             lock (_channelsLock)
             {
-                List<string> emptyChannels = new List<string>();
+                List<TopicName> emptyChannels = new List<TopicName>();
                 foreach (var pair in _channels)
                 {
                     if (pair.Value.IsEmpty)

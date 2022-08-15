@@ -25,9 +25,8 @@ namespace YasES.Core
         /// will be an instance of <see cref="AfterCommitEvent"/>.
         /// </summary>
         /// <exception cref="ArgumentException">Is thrown if <paramref name="topicName"/> is null or empty or whitespace only.</exception>
-        public NotificationEventStoreBuilder NotifyAfterCommit(string topicName)
+        public NotificationEventStoreBuilder NotifyAfterCommit(TopicName topicName)
         {
-            if (string.IsNullOrWhiteSpace(topicName)) throw new ArgumentException($"'{nameof(topicName)}' cannot be null or whitespace.", nameof(topicName));
             AddTopicEventProducer(topicName, AfterCommitStore.MatchesAll);
             return this;
         }
@@ -41,14 +40,13 @@ namespace YasES.Core
         /// will be an instance of <see cref="AfterCommitEvent"/>.
         /// </summary>
         /// <exception cref="ArgumentException">Is thrown if <paramref name="topicName"/> is null or empty or whitespace only.</exception>
-        public NotificationEventStoreBuilder NotifyAfterCommitForStream(StreamIdentifier streamIdentifier, string topicName)
+        public NotificationEventStoreBuilder NotifyAfterCommitForStream(StreamIdentifier streamIdentifier, TopicName topicName)
         {
-            if (string.IsNullOrWhiteSpace(topicName)) throw new ArgumentException($"'{nameof(topicName)}' cannot be null or whitespace.", nameof(topicName));
             AddTopicEventProducer(topicName, BuildStreamIdentifierMatchPredicate(streamIdentifier));
             return this;
         }
 
-        private void AddTopicEventProducer(string topicName, Func<CommitAttempt, bool> predicate)
+        private void AddTopicEventProducer(TopicName topicName, Func<CommitAttempt, bool> predicate)
         {
             ConfigureServices((services) =>
             {
@@ -67,7 +65,7 @@ namespace YasES.Core
         private class AfterCommitStore : IEventReadWrite
         {
             private readonly IEventReadWrite _inner;
-            private readonly string _topicName;
+            private readonly TopicName _topicName;
             private readonly IMessageBroker _broker;
             private readonly Func<CommitAttempt, bool> _predicate;
 
@@ -76,12 +74,12 @@ namespace YasES.Core
                 return true;
             }
 
-            public AfterCommitStore(IEventReadWrite inner, string topicName, IMessageBroker broker)
+            public AfterCommitStore(IEventReadWrite inner, TopicName topicName, IMessageBroker broker)
                 : this(inner, topicName, broker, MatchesAll)
             {
             }
 
-            public AfterCommitStore(IEventReadWrite inner, string topicName, IMessageBroker broker, Func<CommitAttempt, bool> predicate)
+            public AfterCommitStore(IEventReadWrite inner, TopicName topicName, IMessageBroker broker, Func<CommitAttempt, bool> predicate)
             {
                 _inner = inner;
                 _topicName = topicName;
