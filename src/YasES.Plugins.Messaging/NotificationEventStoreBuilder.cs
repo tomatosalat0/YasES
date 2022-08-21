@@ -1,33 +1,34 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using YasES.Plugins.Messaging;
+using MessageBus;
+using MessageBus.Messaging;
+using MessageBus.Messaging.InProcess;
 
 namespace YasES.Core
 {
     public sealed class NotificationEventStoreBuilder : EventStoreBuilder
     {
-        public NotificationEventStoreBuilder(EventStoreBuilder parent, Func<IBrokerCommands, IDisposable?> initialization)
+        public NotificationEventStoreBuilder(EventStoreBuilder parent, MessageBrokerOptions options)
             : base(parent)
         {
-            if (initialization is null) throw new ArgumentNullException(nameof(initialization));
+            if (options is null) throw new ArgumentNullException(nameof(options));
             ConfigureServices((container) =>
             {
-                IMessageBroker broker = new MessageBroker(initialization);
+                IMessageBroker broker = new InProcessMessageBroker(options);
+                IMessageBus bus = new MessageBrokerMessageBus(broker, NullExceptionNotification.Instance);
                 container.RegisterSingleton<IMessageBroker>(broker);
+                container.RegisterSingleton<IMessageBus>(bus);
             });
         }
 
         /// <summary>
         /// After every successful <see cref="IEventWrite.Commit(CommitAttempt)"/>,
-        /// a message wihtin the <see cref="IMessageBroker"/> gets published. The topic
-        /// of the event will be the provided <paramref name="topicName"/>. The message
-        /// will be an instance of <see cref="AfterCommitEvent"/>.
+        /// a message wihtin the <see cref="IMessageBroker"/> gets published. The message
+        /// will be an instance of <see cref="IAfterCommitEvent"/>.
         /// </summary>
-        /// <exception cref="ArgumentException">Is thrown if <paramref name="topicName"/> is null or empty or whitespace only.</exception>
-        public NotificationEventStoreBuilder NotifyAfterCommit(TopicName topicName)
+        public NotificationEventStoreBuilder NotifyAfterCommit()
         {
-            AddTopicEventProducer(topicName, AfterCommitStore.MatchesAll);
+            AddTopicEventProducer(AfterCommitStore.MatchesAll);
             return this;
         }
 
@@ -35,24 +36,22 @@ namespace YasES.Core
         /// After an successful call to <see cref="IEventWrite.Commit(CommitAttempt)"/> and
         /// the commited stream matches the provided <paramref name="streamIdentifier"/>
         /// (see <see cref="CommitAttempt.StreamIdentifier"/> and <see cref="StreamIdentifier.Matches(StreamIdentifier)"/>),
-        /// a message within the <see cref="IMessageBroker"/> gets published. The topic
-        /// of the event will be the provided <paramref name="topicName"/>. The message
-        /// will be an instance of <see cref="AfterCommitEvent"/>.
+        /// a message within the <see cref="IMessageBroker"/> gets published. The message
+        /// will be an instance of <see cref="IAfterCommitEvent"/>.
         /// </summary>
-        /// <exception cref="ArgumentException">Is thrown if <paramref name="topicName"/> is null or empty or whitespace only.</exception>
-        public NotificationEventStoreBuilder NotifyAfterCommitForStream(StreamIdentifier streamIdentifier, TopicName topicName)
+        public NotificationEventStoreBuilder NotifyAfterCommitForStream(StreamIdentifier streamIdentifier)
         {
-            AddTopicEventProducer(topicName, BuildStreamIdentifierMatchPredicate(streamIdentifier));
+            AddTopicEventProducer(BuildStreamIdentifierMatchPredicate(streamIdentifier));
             return this;
         }
 
-        private void AddTopicEventProducer(TopicName topicName, Func<CommitAttempt, bool> predicate)
+        private void AddTopicEventProducer(Func<CommitAttempt, bool> predicate)
         {
             ConfigureServices((services) =>
             {
                 IEventReadWrite existing = services.Resolve<IEventReadWrite>();
-                IMessageBroker broker = services.Resolve<IMessageBroker>();
-                IEventReadWrite overwritten = new AfterCommitStore(existing, topicName, broker, predicate);
+                IMessageBus bus = services.Resolve<IMessageBus>();
+                IEventReadWrite overwritten = new AfterCommitStore(existing, bus, predicate);
                 services.RegisterSingleton<IEventReadWrite>(overwritten);
             });
         }
@@ -65,8 +64,7 @@ namespace YasES.Core
         private class AfterCommitStore : IEventReadWrite
         {
             private readonly IEventReadWrite _inner;
-            private readonly TopicName _topicName;
-            private readonly IMessageBroker _broker;
+            private readonly IMessageBus _bus;
             private readonly Func<CommitAttempt, bool> _predicate;
 
             public static bool MatchesAll(CommitAttempt attempt)
@@ -74,45 +72,44 @@ namespace YasES.Core
                 return true;
             }
 
-            public AfterCommitStore(IEventReadWrite inner, TopicName topicName, IMessageBroker broker)
-                : this(inner, topicName, broker, MatchesAll)
+            public AfterCommitStore(IEventReadWrite inner, IMessageBus bus)
+                : this(inner, bus, MatchesAll)
             {
             }
 
-            public AfterCommitStore(IEventReadWrite inner, TopicName topicName, IMessageBroker broker, Func<CommitAttempt, bool> predicate)
+            public AfterCommitStore(IEventReadWrite inner, IMessageBus bus, Func<CommitAttempt, bool> predicate)
             {
                 _inner = inner;
-                _topicName = topicName;
-                _broker = broker;
+                _bus = bus;
                 _predicate = predicate;
             }
 
             public void Commit(CommitAttempt attempt)
             {
                 _inner.Commit(attempt);
-                Task.Run(() =>
-                {
-                    if (_predicate(attempt))
-                        _broker.Publish<AfterCommitEvent>(new AfterCommitEvent(attempt), _topicName);
-                });
+                if (_predicate(attempt))
+                    _bus.FireEvent<IAfterCommitEvent>(new AfterCommitEvent(attempt));
             }
 
             public IEnumerable<IStoredEventMessage> Read(ReadPredicate predicate)
             {
                 return _inner.Read(predicate);
             }
+
+            private class AfterCommitEvent : IAfterCommitEvent
+            {
+                public AfterCommitEvent(CommitAttempt attempt)
+                {
+                    Attempt = attempt;
+                    MessageId = MessageId.NewId();
+                }
+
+                public CommitAttempt Attempt { get; }
+
+                public DateTime EventRaisedUtc { get; } = SystemClock.UtcNow;
+
+                public MessageId MessageId { get; }
+            }
         }
-    }
-
-    public class AfterCommitEvent
-    {
-        public AfterCommitEvent(CommitAttempt attempt)
-        {
-            Attempt = attempt;
-        }
-
-        public CommitAttempt Attempt { get; }
-
-        public DateTime EventRaisedUtc { get; } = SystemClock.UtcNow;
     }
 }
