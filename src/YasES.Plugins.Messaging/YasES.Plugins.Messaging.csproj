@@ -17,7 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MessageBus\MessageBus.csproj" />
     <ProjectReference Include="..\YasES.Core\YasES.Core.csproj" />
   </ItemGroup>
 
