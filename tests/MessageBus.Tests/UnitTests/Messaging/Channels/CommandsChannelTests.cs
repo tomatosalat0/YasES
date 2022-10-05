@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using MessageBus.Messaging.InProcess.Channels;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -37,30 +38,30 @@ namespace MessageBus.Messaging.Tests.UnitTests.Channels
         }
 
         [TestMethod]
-        public void UnubscribedChannelWontCreateWorkAfterPublish()
+        public async Task UnubscribedChannelWontCreateWorkAfterPublish()
         {
             CommandsChannel channel = new CommandsChannel(() => { });
-            channel.Publish(new object());
+            await channel.Publish(new object());
             Assert.AreEqual(0, channel.CollectWork().Count);
         }
 
         [TestMethod]
-        public void SubscribeAfterPublishWillReceivePendingEvents()
+        public async Task SubscribeAfterPublishWillReceivePendingEvents()
         {
             CommandsChannel channel = new CommandsChannel(() => { });
-            channel.Publish(new object());
+            await channel.Publish(new object());
             channel.Subscribe<object>((_) => { });
             Assert.AreNotEqual(0, channel.CollectWork().Count);
         }
 
         [TestMethod]
-        public void SingleSubscriberReceivesEvent()
+        public async Task SingleSubscriberReceivesEvent()
         {
             int callCount = 0;
             CommandsChannel channel = new CommandsChannel(() => { });
             channel.Subscribe<object>((_) => { _.Ack(); callCount++; });
 
-            channel.Publish(new object());
+            await channel.Publish(new object());
 
             IReadOnlyList<Action> work = channel.CollectWork();
             Assert.AreNotEqual(0, work.Count);
@@ -70,7 +71,7 @@ namespace MessageBus.Messaging.Tests.UnitTests.Channels
         }
 
         [TestMethod]
-        public void OnlyOneSubscriberReceiveOneEvent()
+        public async Task OnlyOneSubscriberReceiveOneEvent()
         {
             int callCount = 0;
             CommandsChannel channel = new CommandsChannel(() => { });
@@ -78,7 +79,7 @@ namespace MessageBus.Messaging.Tests.UnitTests.Channels
             channel.Subscribe<object>((_) => { _.Ack(); callCount++; });
             channel.Subscribe<object>((_) => { _.Ack(); callCount++; });
 
-            channel.Publish(new object());
+            await channel.Publish(new object());
 
             IReadOnlyList<Action> work = channel.CollectWork();
             Assert.AreNotEqual(0, work.Count);
@@ -88,14 +89,14 @@ namespace MessageBus.Messaging.Tests.UnitTests.Channels
         }
 
         [TestMethod]
-        public void SubscriberWontReceiveEventsAfterSubscriptionDispose()
+        public async Task SubscriberWontReceiveEventsAfterSubscriptionDispose()
         {
             int callCount = 0;
             CommandsChannel channel = new CommandsChannel(() => { });
             IDisposable subscription = channel.Subscribe<object>((_) => { callCount++; });
             subscription.Dispose();
 
-            channel.Publish(new object());
+            await channel.Publish(new object());
 
             IReadOnlyList<Action> work = channel.CollectWork();
             foreach (var p in work)
@@ -104,7 +105,7 @@ namespace MessageBus.Messaging.Tests.UnitTests.Channels
         }
 
         [TestMethod]
-        public void UndisposedSubscriptionWillReceiveEvents()
+        public async Task UndisposedSubscriptionWillReceiveEvents()
         {
             int callCountA = 0;
             int callCountB = 0;
@@ -113,7 +114,7 @@ namespace MessageBus.Messaging.Tests.UnitTests.Channels
             IDisposable subscriptionB = channel.Subscribe<object>((_) => { _.Ack(); callCountB++; });
             subscriptionA.Dispose();
 
-            channel.Publish(new object());
+            await channel.Publish(new object());
 
             IReadOnlyList<Action> work = channel.CollectWork();
             foreach (var p in work)
@@ -123,7 +124,7 @@ namespace MessageBus.Messaging.Tests.UnitTests.Channels
         }
 
         [TestMethod]
-        public void CommandsChannelFiresUnacknowledgedEventAgain()
+        public async Task CommandsChannelFiresUnacknowledgedEventAgain()
         {
             int callCount = 0;
             CommandsChannel channel = new CommandsChannel(() => { });
@@ -132,7 +133,7 @@ namespace MessageBus.Messaging.Tests.UnitTests.Channels
                     _.Ack();
                 callCount++; 
             });
-            channel.Publish(new object());
+            await channel.Publish(new object());
 
             while (true)
             {
@@ -147,12 +148,12 @@ namespace MessageBus.Messaging.Tests.UnitTests.Channels
         }
 
         [TestMethod]
-        public void CommandsChannelDoesntFireAcknowledgedEventAgain()
+        public async Task CommandsChannelDoesntFireAcknowledgedEventAgain()
         {
             int callCount = 0;
             CommandsChannel channel = new CommandsChannel(() => { });
             channel.Subscribe<object>((_) => { _.Ack(); callCount++; });
-            channel.Publish(new object());
+            await channel.Publish(new object());
 
             while (true)
             {
@@ -167,12 +168,12 @@ namespace MessageBus.Messaging.Tests.UnitTests.Channels
         }
 
         [TestMethod]
-        public void CommandsChannelDoesntFireNotAcknowledgedEventAgain()
+        public async Task CommandsChannelDoesntFireNotAcknowledgedEventAgain()
         {
             int callCount = 0;
             CommandsChannel channel = new CommandsChannel(() => { });
             channel.Subscribe<object>((_) => { _.Nack(); callCount++; });
-            channel.Publish(new object());
+            await channel.Publish(new object());
 
             while (true)
             {
@@ -187,7 +188,7 @@ namespace MessageBus.Messaging.Tests.UnitTests.Channels
         }
 
         [TestMethod]
-        public void CommandsChannelFiresUnacknowledgedEventAgainWithException()
+        public async Task CommandsChannelFiresUnacknowledgedEventAgainWithException()
         {
             int callCount = 0;
             CommandsChannel channel = new CommandsChannel(() => { });
@@ -198,7 +199,7 @@ namespace MessageBus.Messaging.Tests.UnitTests.Channels
                 else
                     _.Ack();
             });
-            channel.Publish(new object());
+            await channel.Publish(new object());
 
             while (true)
             {
@@ -213,7 +214,7 @@ namespace MessageBus.Messaging.Tests.UnitTests.Channels
         }
 
         [TestMethod]
-        public void CommandsChannelFiresNotAcknowledgedEventAgainWithException()
+        public async Task CommandsChannelFiresNotAcknowledgedEventAgainWithException()
         {
             int callCount = 0;
             CommandsChannel channel = new CommandsChannel(() => { });
@@ -223,7 +224,7 @@ namespace MessageBus.Messaging.Tests.UnitTests.Channels
                 if (callCount < 2)
                     throw new Exception();
             });
-            channel.Publish(new object());
+            await channel.Publish(new object());
 
             while (true)
             {
@@ -238,7 +239,7 @@ namespace MessageBus.Messaging.Tests.UnitTests.Channels
         }
 
         [TestMethod]
-        public void CleanupWillRemoveDisposedSubscriptions()
+        public async Task CleanupWillRemoveDisposedSubscriptions()
         {
             CommandsChannel channel = new CommandsChannel(() => { });
 
@@ -248,7 +249,7 @@ namespace MessageBus.Messaging.Tests.UnitTests.Channels
 
             channel.Cleanup();
 
-            channel.Publish(new object());
+            await channel.Publish(new object());
 
             while (true)
             {

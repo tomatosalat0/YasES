@@ -17,7 +17,7 @@ namespace MessageBus.Tests.UnitTests
             bus.RegisterCommandDelegate<CommandA>(m => numberOfCalls++);
             CommandA command = new CommandA();
 
-            bus.FireCommand(command);
+            await bus.FireCommand(command);
 
             await Task.Delay(100);
 
@@ -66,7 +66,7 @@ namespace MessageBus.Tests.UnitTests
             bus.RegisterCommandDelegate<CommandA>(m => throw new NotSupportedException());
             CommandA command = new CommandA();
 
-            bus.FireCommand(command);
+            await bus.FireCommand(command);
 
             await Task.Delay(1000);
 
@@ -90,7 +90,7 @@ namespace MessageBus.Tests.UnitTests
             });
             CommandA command = new CommandA();
 
-            bus.FireCommand(command);
+            await bus.FireCommand(command);
             await semaphore.WaitAsync();
             Assert.AreEqual(1, numberOfCalls);
         }

@@ -13,19 +13,19 @@ namespace MessageBus
     public partial class MessageBrokerMessageBus : IMessageBusPublishing, IDisposable
     {
         /// <inheritdoc/>
-        public void FireEvent<TEvent>(TEvent @event)
+        public Task FireEvent<TEvent>(TEvent @event)
             where TEvent : IMessageEvent
         {
             ThrowDisposed();
-            _broker.Publish(@event, GetTopicNameFromType(typeof(TEvent)));
+            return _broker.Publish(@event, GetTopicNameFromType(typeof(TEvent)));
         }
 
         /// <inheritdoc/>
-        public void FireCommand<TCommand>(TCommand command)
+        public Task FireCommand<TCommand>(TCommand command)
             where TCommand : IMessageCommand
         {
             ThrowDisposed();
-            _broker.Publish(command, GetTopicNameFromType(typeof(TCommand)));
+            return _broker.Publish(command, GetTopicNameFromType(typeof(TCommand)));
         }
 
         /// <inheritdoc/>
@@ -129,8 +129,7 @@ namespace MessageBus
 
             using var subscription = RegisterCompleteHandler<TResponse>(resultTopic, (o) => channel.Writer.TryWrite(o));
 
-            _broker.Publish(request, fireTopic);
-
+            await _broker.Publish(request, fireTopic);
             await foreach (var p in channel.Reader.ReadAllAsync(cancellationToken))
             {
                 if (p.MessageId == request.MessageId)

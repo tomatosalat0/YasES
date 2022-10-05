@@ -12,7 +12,7 @@ namespace MessageBus
         /// will return immediately.
         /// </summary>
         /// <exception cref="ObjectDisposedException">Is thrown if the object is already disposed.</exception>
-        void FireEvent<TEvent>(TEvent @event)
+        Task FireEvent<TEvent>(TEvent @event)
             where TEvent : IMessageEvent;
 
         /// <summary>
@@ -20,7 +20,7 @@ namespace MessageBus
         /// currently subscribed to the provided event type.
         /// </summary>
         /// <exception cref="ObjectDisposedException">Is thrown if the object is already disposed.</exception>
-        void FireCommand<TCommand>(TCommand command)
+        Task FireCommand<TCommand>(TCommand command)
             where TCommand : IMessageCommand;
 
         /// <summary>

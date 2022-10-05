@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using MessageBus.Messaging.InProcess.Channels;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -37,30 +38,30 @@ namespace MessageBus.Messaging.Tests.UnitTests.Channels
         }
 
         [TestMethod]
-        public void UnubscribedChannelWontCreateWorkAfterPublish()
+        public async Task UnubscribedChannelWontCreateWorkAfterPublish()
         {
             EventsChannel channel = new EventsChannel(() => { });
-            channel.Publish(new object());
+            await channel.Publish(new object());
             Assert.AreEqual(0, channel.CollectWork().Count);
         }
 
         [TestMethod]
-        public void SubscribeAfterPublishDoesNotReceivePreviousEvents()
+        public async Task SubscribeAfterPublishDoesNotReceivePreviousEvents()
         {
             EventsChannel channel = new EventsChannel(() => { });
-            channel.Publish(new object());
+            await channel.Publish(new object());
             channel.Subscribe<object>((_) => { });
             Assert.AreEqual(0, channel.CollectWork().Count);
         }
 
         [TestMethod]
-        public void SingleSubscriberReceivesEvent()
+        public async Task SingleSubscriberReceivesEvent()
         {
             int callCount = 0;
             EventsChannel channel = new EventsChannel(() => { });
             channel.Subscribe<object>((_) => { callCount++; });
 
-            channel.Publish(new object());
+            await channel.Publish(new object());
 
             IReadOnlyList<Action> work = channel.CollectWork();
             Assert.AreNotEqual(0, work.Count);
@@ -70,7 +71,7 @@ namespace MessageBus.Messaging.Tests.UnitTests.Channels
         }
 
         [TestMethod]
-        public void AllSubscriberReceiveOneEvent()
+        public async Task AllSubscriberReceiveOneEvent()
         {
             int callCount = 0;
             EventsChannel channel = new EventsChannel(() => { });
@@ -78,7 +79,7 @@ namespace MessageBus.Messaging.Tests.UnitTests.Channels
             channel.Subscribe<object>((_) => { callCount++; });
             channel.Subscribe<object>((_) => { callCount++; });
 
-            channel.Publish(new object());
+            await channel.Publish(new object());
 
             IReadOnlyList<Action> work = channel.CollectWork();
             Assert.AreNotEqual(0, work.Count);
@@ -88,14 +89,14 @@ namespace MessageBus.Messaging.Tests.UnitTests.Channels
         }
 
         [TestMethod]
-        public void SubscriberWontReceiveEventsAfterSubscriptionDispose()
+        public async Task SubscriberWontReceiveEventsAfterSubscriptionDispose()
         {
             int callCount = 0;
             EventsChannel channel = new EventsChannel(() => { });
             IDisposable subscription = channel.Subscribe<object>((_) => { callCount++; });
             subscription.Dispose();
 
-            channel.Publish(new object());
+            await channel.Publish(new object());
 
             IReadOnlyList<Action> work = channel.CollectWork();
             foreach (var p in work)
@@ -104,12 +105,12 @@ namespace MessageBus.Messaging.Tests.UnitTests.Channels
         }
 
         [TestMethod]
-        public void EventsChannelDoesntFireUnacknowledgedEventAgain()
+        public async Task EventsChannelDoesntFireUnacknowledgedEventAgain()
         {
             int callCount = 0;
             EventsChannel channel = new EventsChannel(() => { });
             channel.Subscribe<object>((_) => { callCount++; });
-            channel.Publish(new object());
+            await channel.Publish(new object());
 
             while (true)
             {
@@ -124,12 +125,12 @@ namespace MessageBus.Messaging.Tests.UnitTests.Channels
         }
 
         [TestMethod]
-        public void EventsChannelDoesntFireAcknowledgedEventAgain()
+        public async Task EventsChannelDoesntFireAcknowledgedEventAgain()
         {
             int callCount = 0;
             EventsChannel channel = new EventsChannel(() => { });
             channel.Subscribe<object>((_) => { _.Ack(); callCount++; });
-            channel.Publish(new object());
+            await channel.Publish(new object());
 
             while (true)
             {
@@ -144,12 +145,12 @@ namespace MessageBus.Messaging.Tests.UnitTests.Channels
         }
 
         [TestMethod]
-        public void EventsChannelDoesntFireNotAcknowledgedEventAgain()
+        public async Task EventsChannelDoesntFireNotAcknowledgedEventAgain()
         {
             int callCount = 0;
             EventsChannel channel = new EventsChannel(() => { });
             channel.Subscribe<object>((_) => { _.Nack(); callCount++; });
-            channel.Publish(new object());
+            await channel.Publish(new object());
 
             while (true)
             {
@@ -164,12 +165,12 @@ namespace MessageBus.Messaging.Tests.UnitTests.Channels
         }
 
         [TestMethod]
-        public void EventsChannelDoesntFireEventAgainWithException()
+        public async Task EventsChannelDoesntFireEventAgainWithException()
         {
             int callCount = 0;
             EventsChannel channel = new EventsChannel(() => { });
             channel.Subscribe<object>((_) => { callCount++; throw new Exception(); });
-            channel.Publish(new object());
+            await channel.Publish(new object());
 
             while (true)
             {
@@ -184,15 +185,15 @@ namespace MessageBus.Messaging.Tests.UnitTests.Channels
         }
 
         [TestMethod]
-        public void EventSubscriptionCanBeDisposedInCallback()
+        public async Task EventSubscriptionCanBeDisposedInCallback()
         {
             int callCount = 0;
             EventsChannel channel = new EventsChannel(() => { });
             IDisposable subscription = null!;
             subscription = channel.Subscribe<object>((_) => { callCount++; subscription.Dispose(); });
 
-            channel.Publish(new object());
-            channel.Publish(new object());
+            await channel.Publish(new object());
+            await channel.Publish(new object());
 
             while (true)
             {
@@ -207,7 +208,7 @@ namespace MessageBus.Messaging.Tests.UnitTests.Channels
         }
 
         [TestMethod]
-        public void CleanupWillRemoveDisposedSubscriptions()
+        public async Task CleanupWillRemoveDisposedSubscriptions()
         {
             EventsChannel channel = new EventsChannel(() => { });
 
@@ -217,7 +218,7 @@ namespace MessageBus.Messaging.Tests.UnitTests.Channels
 
             channel.Cleanup();
 
-            channel.Publish(new object());
+            await channel.Publish(new object());
 
             while (true)
             {

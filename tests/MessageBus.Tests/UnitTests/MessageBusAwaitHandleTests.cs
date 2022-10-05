@@ -20,7 +20,7 @@ namespace MessageBus.Tests.UnitTests
             {
                 for (int i = 0; i < 20; i++)
                 {
-                    bus.FireEvent(new NumberEvent(i));
+                    await bus.FireEvent(new NumberEvent(i));
                     await Task.Delay(10);
                 }
             });

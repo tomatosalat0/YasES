@@ -58,7 +58,7 @@ namespace MessageBus.Tests.UnitTests
             bus.RegisterEventDelegate<TestEventA>(m => throw new NotSupportedException());
             TestEventA @event = new TestEventA();
 
-            bus.FireEvent(@event);
+            await bus.FireEvent(@event);
 
             await Task.Delay(1000);
 
@@ -82,7 +82,7 @@ namespace MessageBus.Tests.UnitTests
             });
             TestEventA @event = new TestEventA();
 
-            bus.FireEvent(@event);
+            await bus.FireEvent(@event);
             await semaphore.WaitAsync();
             Assert.AreEqual(1, numberOfCalls);
         }

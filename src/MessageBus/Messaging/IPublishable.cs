@@ -1,4 +1,6 @@
-﻿namespace MessageBus.Messaging
+﻿using System.Threading.Tasks;
+
+namespace MessageBus.Messaging
 {
     public interface IPublishable
     {
@@ -7,6 +9,6 @@
         /// current channel. Publishing a message won't directly
         /// call any subscribers.
         /// </summary>
-        void Publish<T>(T message);
+        Task Publish<T>(T message);
     }
 }

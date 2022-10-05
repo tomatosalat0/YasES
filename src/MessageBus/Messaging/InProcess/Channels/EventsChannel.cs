@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using MessageBus.Messaging.InProcess.Messages;
 
 namespace MessageBus.Messaging.InProcess.Channels
@@ -138,13 +139,15 @@ namespace MessageBus.Messaging.InProcess.Channels
         {
         }
 
-        public void Publish<T>(T message)
+        public Task Publish<T>(T message)
         {
             if (message is null) throw new ArgumentNullException(nameof(message));
 
             int numberOfPublishes = _allSubscriptions.ForEach(channel => channel.IsActive, channel => channel.Enqueue(new Message(message)));
             if (numberOfPublishes > 0)
                 _awake();
+
+            return Task.CompletedTask;
         }
 
         private class TrackedSubscription : IDisposable

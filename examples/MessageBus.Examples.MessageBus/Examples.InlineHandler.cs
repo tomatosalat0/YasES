@@ -17,7 +17,7 @@ namespace MessageBus.Examples.MessageBus
                 message => Console.WriteLine($"\t > [{message.MessageId}] {message.LogMessage}")
             );
 
-            eventSystem.FireCommand(new LogMessageCommand("Please log this message"));
+            await eventSystem.FireCommand(new LogMessageCommand("Please log this message"));
 
             // the LogMessageCreated handler will be called asynchroniously after the command completed.
             // So just wait until its done.

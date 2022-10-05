@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using MessageBus.Messaging.InProcess.Channels;
 using MessageBus.Messaging.InProcess.Execution;
 
@@ -86,7 +87,7 @@ namespace MessageBus.Messaging.InProcess
             };
         }
 
-        public IMessageBroker Publish<T>(T message, IReadOnlyList<TopicName> topics)
+        public Task Publish<T>(T message, IReadOnlyList<TopicName> topics)
         {
             if (message is null) throw new ArgumentNullException(nameof(message));
             if (topics is null) throw new ArgumentNullException(nameof(topics));
@@ -102,10 +103,7 @@ namespace MessageBus.Messaging.InProcess
                     .ToArray()
             );
 
-            foreach (var channel in targetChannels)
-                channel.Publish(message);
-
-            return this;
+            return Task.WhenAll(targetChannels.Select(p => p.Publish(message)));
         }
 
         private void HandleAwake()

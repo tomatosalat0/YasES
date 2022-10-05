@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MessageBus.Messaging.InProcess.Scheduler;
 using MessageBus.Messaging.InProcess;
+using System.Threading.Tasks;
 
 namespace MessageBus.Messaging.Tests.UnitTests
 {
@@ -31,18 +32,18 @@ namespace MessageBus.Messaging.Tests.UnitTests
         }
 
         [TestMethod]
-        public void MessageBrokerThrowsExceptionWhenPublishGetsNull()
+        public async Task MessageBrokerThrowsExceptionWhenPublishGetsNull()
         {
             using IMessageBroker broker = CreateBrokerWithManualScheduler(out _);
-            Assert.ThrowsException<ArgumentNullException>(() => broker.Publish<object>(null, new TopicName("Topic")));
-            Assert.ThrowsException<ArgumentNullException>(() => broker.Publish<object>(new object(), null));
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(() => broker.Publish<object>(null, new TopicName("Topic")));
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(() => broker.Publish<object>(new object(), null));
         }
 
         [TestMethod]
-        public void MessageBrokerThrowsExceptionWhenPublishingToNoChannel()
+        public async Task MessageBrokerThrowsExceptionWhenPublishingToNoChannel()
         {
             using IMessageBroker broker = CreateBrokerWithManualScheduler(out _);
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => broker.Publish(new object(), Array.Empty<TopicName>()));
+            await Assert.ThrowsExceptionAsync<ArgumentOutOfRangeException>(() => broker.Publish(new object(), Array.Empty<TopicName>()));
         }
 
         [TestMethod]
@@ -53,33 +54,33 @@ namespace MessageBus.Messaging.Tests.UnitTests
         }
 
         [TestMethod]
-        public void DisposedMessageBrokerThrowsDisposedException()
+        public async Task DisposedMessageBrokerThrowsDisposedException()
         {
             IMessageBroker broker = CreateBroker();
             broker.Dispose();
 
             Assert.ThrowsException<ObjectDisposedException>(() => broker.Commands(new TopicName("Topic")));
-            Assert.ThrowsException<ObjectDisposedException>(() => broker.Publish(new object(), new TopicName("Topic")));
+            await Assert.ThrowsExceptionAsync<ObjectDisposedException>(() => broker.Publish(new object(), new TopicName("Topic")));
         }
 
         [TestMethod]
-        public void MessageBrokerReturnsTrueIfMessageHasArrived()
+        public async Task MessageBrokerReturnsTrueIfMessageHasArrived()
         {
             using IMessageBroker broker = CreateBrokerWithManualScheduler(out var scheduler);
             broker.Commands("Topic").Subscribe<object>((_) => { });
-            broker.Publish<object>(new object(), "Topic");
+            await broker.Publish<object>(new object(), "Topic");
             Assert.IsTrue(scheduler.HasWork());
         }
 
         [TestMethod]
-        public void DrainingTheMessageBrokerCallsUntilNoMessageIsLeft()
+        public async Task DrainingTheMessageBrokerCallsUntilNoMessageIsLeft()
         {
             using IMessageBroker broker = CreateBrokerWithManualScheduler(out var scheduler);
 
             int numberOfCalls = 0;
             broker.Commands(new TopicName("Topic")).Subscribe((_) => { _.Ack(); numberOfCalls++; });
-            broker.Publish(new object(), new TopicName("Topic"));
-            broker.Publish(new object(), new TopicName("Topic"));
+            await broker.Publish(new object(), new TopicName("Topic"));
+            await broker.Publish(new object(), new TopicName("Topic"));
 
             scheduler.Drain();
             Assert.AreEqual(2, numberOfCalls);

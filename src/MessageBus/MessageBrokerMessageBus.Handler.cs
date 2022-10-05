@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using MessageBus.Messaging;
 
 namespace MessageBus
@@ -16,7 +17,11 @@ namespace MessageBus
             ThrowDisposed();
             return InnerRegisterEventHandler<TEvent, IMessageEventHandler<TEvent>>(
                 handler,
-                m => handler.Handle(m.Payload)
+                m =>
+                {
+                    handler.Handle(m.Payload);
+                    return Task.CompletedTask;
+                }
             );
         }
 
@@ -27,7 +32,7 @@ namespace MessageBus
             ThrowDisposed();
             return InnerRegisterEventHandler<TEvent, IAsyncMessageEventHandler<TEvent>>(
                 handler,
-                m => handler.HandleAsync(m.Payload).ConfigureAwait(false).GetAwaiter().GetResult()
+                m => handler.HandleAsync(m.Payload)
             );
         }
 
@@ -38,7 +43,11 @@ namespace MessageBus
             ThrowDisposed();
             return InnerRegisterCommandHandler<TCommand, IMessageCommandHandler<TCommand>>(
                 handler,
-                m => handler.Handle(m)
+                m =>
+                {
+                    handler.Handle(m);
+                    return Task.CompletedTask;
+                }
             );
         }
 
@@ -49,7 +58,7 @@ namespace MessageBus
             ThrowDisposed();
             return InnerRegisterCommandHandler<TCommand, IAsyncMessageCommandHandler<TCommand>>(
                 handler,
-                m => handler.HandleAsync(m).ConfigureAwait(false).GetAwaiter().GetResult()
+                m => handler.HandleAsync(m)
             );
         }
 
@@ -101,7 +110,7 @@ namespace MessageBus
             );
         }
 
-        private IDisposable InnerRegisterEventHandler<TEvent, TEventHandler>(TEventHandler handler, Action<IMessage<TEvent>> execute)
+        private IDisposable InnerRegisterEventHandler<TEvent, TEventHandler>(TEventHandler handler, Func<IMessage<TEvent>, Task> execute)
             where TEvent : IMessageEvent
         {
             IDisposable subscription = _broker
@@ -115,7 +124,7 @@ namespace MessageBus
             return AssignSubscription(handler, subscription);
         }
 
-        private IDisposable InnerRegisterCommandHandler<TCommand, TCommandHandler>(TCommandHandler handler, Action<TCommand> execute)
+        private IDisposable InnerRegisterCommandHandler<TCommand, TCommandHandler>(TCommandHandler handler, Func<TCommand, Task> execute)
             where TCommand : IMessageCommand
         {
             IDisposable subscription = _broker
@@ -163,9 +172,9 @@ namespace MessageBus
             return subscription;
         }
 
-        protected virtual void ExecuteMessage<TEvent>(IMessage<TEvent> message, Action<IMessage<TEvent>> handler)
+        protected virtual void ExecuteMessage<TEvent>(IMessage<TEvent> message, Func<IMessage<TEvent>, Task> handler)
         {
-            handler(message);
+            handler(message).ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         private void NotifyException(MessageId messageId, object message, Exception exception)
@@ -173,11 +182,11 @@ namespace MessageBus
             _exceptionNotification.NotifyException(messageId, message, exception);
         }
 
-        private void WithExceptionNotification(MessageId messageId, object message, Action execution)
+        private async Task WithExceptionNotification(MessageId messageId, object message, Func<Task> execution)
         {
             try
             {
-                execution();
+                await execution();
             }
             catch (Exception ex)
             {
@@ -186,26 +195,26 @@ namespace MessageBus
             }
         }
 
-        private void HandleCommandMessage<TCommand>(IMessage<TCommand> message, Action<TCommand> run)
+        private Task HandleCommandMessage<TCommand>(IMessage<TCommand> message, Func<TCommand, Task> run)
             where TCommand : IMessageCommand
         {
-            HandleMessageAndPublishOutcome(
+            return HandleMessageAndPublishOutcome(
                 GetOutcomeTopicName(message.Payload),
                 message,
-                m =>
+                command =>
                 {
-                    WithExceptionNotification(message.Payload.MessageId, message.Payload, () => run(m));
+                    ExecuteMessage(message, m => WithExceptionNotification(m.Payload.MessageId, m.Payload, () => run(m.Payload)));
                     return MessageCommandOutcome.Success(message.Payload.MessageId);
                 },
                 CreateCommandFailureResult
             );
         }
 
-        private void HandleQueryMessage<TQuery, TQueryResult>(IMessage<TQuery> message, Func<TQuery, TQueryResult> run)
+        private Task HandleQueryMessage<TQuery, TQueryResult>(IMessage<TQuery> message, Func<TQuery, TQueryResult> run)
             where TQuery : IMessageQuery<TQueryResult>
             where TQueryResult : IMessageQueryResult
         {
-            HandleMessageAndPublishOutcome<TQuery, IMessageQueryResult>(
+            return HandleMessageAndPublishOutcome<TQuery, IMessageQueryResult>(
                 GetOutcomeTopicName(message.Payload),
                 message,
                 m => run(m),
@@ -213,11 +222,11 @@ namespace MessageBus
             );
         }
 
-        private void HandleRpcMessage<TRpc, TRpcResult>(IMessage<TRpc> message, Func<TRpc, TRpcResult> run)
+        private Task HandleRpcMessage<TRpc, TRpcResult>(IMessage<TRpc> message, Func<TRpc, TRpcResult> run)
             where TRpc : IMessageRpc<TRpcResult>
             where TRpcResult : IMessageRpcResult
         {
-            HandleMessageAndPublishOutcome<TRpc, IMessageRpcResult>(
+            return HandleMessageAndPublishOutcome<TRpc, IMessageRpcResult>(
                 GetOutcomeTopicName(message.Payload),
                 message,
                 m => run(m),
@@ -225,7 +234,7 @@ namespace MessageBus
             );
         }
 
-        private void HandleMessageAndPublishOutcome<TIncomming, TOutcome>(
+        private Task HandleMessageAndPublishOutcome<TIncomming, TOutcome>(
             TopicName outcomeTopic,
             IMessage<TIncomming> message,
             Func<TIncomming, TOutcome> run,
@@ -244,7 +253,7 @@ namespace MessageBus
                 outcome = onException(message, ex);
                 message.Nack();
             }
-            _broker.Publish(outcome, outcomeTopic);
+            return _broker.Publish(outcome, outcomeTopic);
         }
 
         private static IMessageQueryResult.FailureResult CreateQueryFailureResult<TQuery>(IMessage<TQuery> message, Exception ex)

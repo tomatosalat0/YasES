@@ -145,11 +145,11 @@ namespace MessageBus.Examples.Work
 
         static async Task FireAsync(IMessageBroker broker)
         {
-            broker.Publish<MyChannelMessage>(new MyChannelMessage("Hello World!"), MyChannel);
+            await broker.Publish(new MyChannelMessage("Hello World!"), MyChannel);
             foreach (var id in Enumerable.Range(0, 10))
-                broker.Publish<MyChannelMessage>(new MyChannelMessage($"Message {id}"), MyChannel);
+                await broker.Publish(new MyChannelMessage($"Message {id}"), MyChannel);
             await Task.Delay(2000);
-            broker.Publish<MyChannelMessage>(new MyChannelMessage("Hello World after 2 sec."), MyChannel);
+            await broker.Publish(new MyChannelMessage("Hello World after 2 sec."), MyChannel);
         }
     }
 

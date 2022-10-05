@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
 using MessageBus.Messaging.InProcess.Messages;
 
 namespace MessageBus.Messaging.InProcess.Channels
@@ -133,11 +134,12 @@ namespace MessageBus.Messaging.InProcess.Channels
             }
         }
 
-        public void Publish<T>(T message)
+        public Task Publish<T>(T message)
         {
             if (message is null) throw new ArgumentNullException(nameof(message));
             _pendingWork.Enqueue(new Message(message));
             _awake();
+            return Task.CompletedTask;
         }
     }
 }

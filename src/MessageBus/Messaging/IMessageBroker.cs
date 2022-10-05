@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace MessageBus.Messaging
 {
@@ -38,7 +39,7 @@ namespace MessageBus.Messaging
         /// channels specified in <paramref name="topics"/>. If a channel
         /// does not exist, it will get skipped silently.
         /// </summary>
-        IMessageBroker Publish<T>(T message, IReadOnlyList<TopicName> topics);
+        Task Publish<T>(T message, IReadOnlyList<TopicName> topics);
     }
 
     [Flags]
@@ -74,12 +75,12 @@ namespace MessageBus.Messaging
             return broker.Events(topic, EventsOptions.None);
         }
 
-        public static IMessageBroker Publish<T>(this IMessageBroker broker, T message, TopicName topic)
+        public static Task Publish<T>(this IMessageBroker broker, T message, TopicName topic)
         {
             return broker.Publish(message, new[] { topic });
         }
 
-        public static IMessageBroker Publish<T>(this IMessageBroker broker, T message, TopicName topic, params TopicName[] otherTopics)
+        public static Task Publish<T>(this IMessageBroker broker, T message, TopicName topic, params TopicName[] otherTopics)
 {
             return broker.Publish(message, new[] { topic }.Concat(otherTopics).ToArray());
         }
