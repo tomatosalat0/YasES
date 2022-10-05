@@ -15,7 +15,7 @@ namespace YasES.Core
             ConfigureServices((container) =>
             {
                 IMessageBroker broker = new InProcessMessageBroker(options);
-                IMessageBus bus = new MessageBrokerMessageBus(broker, NullExceptionNotification.Instance);
+                IMessageBus bus = new MessageBrokerMessageBus(broker, NoExceptionNotification.Instance);
                 container.RegisterSingleton<IMessageBroker>(broker);
                 container.RegisterSingleton<IMessageBus>(bus);
             });

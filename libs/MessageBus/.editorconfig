@@ -1,0 +1,220 @@
+﻿[*.cs]
+
+# SA1208: System using directives should be placed before other using directives
+dotnet_diagnostic.SA1208.severity = error
+
+# IDE0005: Using directive is unnecessary.
+dotnet_diagnostic.IDE0005.severity = error
+
+# IDE0044: Add readonly modifier
+dotnet_diagnostic.IDE0044.severity = error
+
+# IDE0090: Use 'new(...)'
+csharp_style_implicit_object_creation_when_type_is_apparent = false
+
+# IDE0001: Simplify Names
+dotnet_diagnostic.IDE0001.severity = silent
+
+# SA1507: Code should not contain multiple blank lines in a row
+dotnet_diagnostic.SA1507.severity = error
+
+# CA1822: Mark members as static
+dotnet_diagnostic.CA1822.severity = suggestion
+
+# IDE0059: Unnecessary assignment of a value
+dotnet_diagnostic.IDE0059.severity = error
+
+# IDE0090: Use 'new(...)'
+dotnet_diagnostic.IDE0090.severity = none
+
+# CA1051: Do not declare visible instance fields
+dotnet_code_quality.ca1051.exclude_structs = true
+
+# SA1503: Braces should not be omitted
+dotnet_diagnostic.SA1503.severity = none
+
+# SA1633: File should have header
+dotnet_diagnostic.SA1633.severity = none
+
+# SA1200: Using directives should be placed correctly
+dotnet_diagnostic.SA1200.severity = none
+
+# SA1309: Field names should not begin with underscore
+dotnet_diagnostic.SA1309.severity = none
+
+# SA1101: Prefix local calls with this
+dotnet_diagnostic.SA1101.severity = none
+
+# SA1600: Elements should be documented
+dotnet_diagnostic.SA1600.severity = silent
+
+# SA1516: Elements should be separated by blank line
+dotnet_diagnostic.SA1516.severity = none
+
+# SA1119: Statement should not use unnecessary parenthesis
+dotnet_diagnostic.SA1119.severity = none
+
+# IDE0024: Use block body for operators
+dotnet_diagnostic.IDE0024.severity = none
+
+# SA1513: Closing brace should be followed by blank line
+dotnet_diagnostic.SA1513.severity = none
+
+# SA1402: File may only contain a single type
+dotnet_diagnostic.SA1402.severity = none
+
+# SA1204: Static elements should appear before instance elements
+dotnet_diagnostic.SA1204.severity = none
+
+# SA1201: Elements should appear in the correct order
+dotnet_diagnostic.SA1201.severity = none
+
+# SA1202: Elements should be ordered by access
+dotnet_diagnostic.SA1202.severity = none
+
+# SA1623: Property summary documentation should match accessors
+dotnet_diagnostic.SA1623.severity = silent
+
+# SA1615: Element return value should be documented
+dotnet_diagnostic.SA1615.severity = none
+
+# SA1611: Element parameters should be documented
+dotnet_diagnostic.SA1611.severity = none
+
+# SA1214: Readonly fields should appear before non-readonly fields
+dotnet_diagnostic.SA1214.severity = none
+
+# SA1111: Closing parenthesis should be on line of last parameter
+dotnet_diagnostic.SA1111.severity = none
+
+# SA1009: Closing parenthesis should be spaced correctly
+dotnet_diagnostic.SA1009.severity = none
+
+# SA1400: Access modifier should be declared
+dotnet_diagnostic.SA1400.severity = error
+
+# SA1408: Conditional expressions should declare precedence
+dotnet_diagnostic.SA1408.severity = error
+
+# SA1606: Element documentation should have summary text
+dotnet_diagnostic.SA1606.severity = error
+
+# SA1310: Field names should not contain underscore
+dotnet_diagnostic.SA1310.severity = none
+
+# SA1618: Generic type parameters should be documented
+dotnet_diagnostic.SA1618.severity = none
+
+# SA1515: Single-line comment should be preceded by blank line
+dotnet_diagnostic.SA1515.severity = none
+
+# SA1413: Use trailing comma in multi-line initializers
+dotnet_diagnostic.SA1413.severity = none
+
+# SA1116: Split parameters should start on line after declaration
+dotnet_diagnostic.SA1116.severity = none
+
+# SA1127: Generic type constraints should be on their own line
+dotnet_diagnostic.SA1127.severity = none
+
+# SA1128: Put constructor initializers on their own line
+dotnet_diagnostic.SA1128.severity = none
+
+# SA1300: Element should begin with upper-case letter
+dotnet_diagnostic.SA1300.severity = silent
+
+# SA1117: Parameters should be on same line or separate lines
+dotnet_diagnostic.SA1117.severity = none
+
+# SA1642: Constructor summary documentation should begin with standard text
+dotnet_diagnostic.SA1642.severity = none
+
+# CS0419: Ambiguous reference in cref attribute
+dotnet_diagnostic.CS0419.severity = none
+
+# SA1203: Constants should appear before fields
+dotnet_diagnostic.SA1203.severity = none
+
+# SA1500: Braces for multi-line statements should not share line
+dotnet_diagnostic.SA1500.severity = none
+
+# SA1504: All accessors should be single-line or multi-line
+dotnet_diagnostic.SA1504.severity = none
+
+# SA1407: Arithmetic expressions should declare precedence
+dotnet_diagnostic.SA1407.severity = silent
+
+# SA1129: Do not use default value type constructor
+dotnet_diagnostic.SA1129.severity = none
+
+# SA1502: Element should not be on a single line
+dotnet_diagnostic.SA1502.severity = none
+
+# SA1114: Parameter list should follow declaration
+dotnet_diagnostic.SA1114.severity = none
+
+# CS1584: XML comment has syntactically incorrect cref attribute
+dotnet_diagnostic.CS1584.severity = none
+
+# SA1520: Use braces consistently
+dotnet_diagnostic.SA1520.severity = none
+
+# CS1658: Warning is overriding an error
+dotnet_diagnostic.CS1658.severity = none
+
+# SA1401: Fields should be private
+dotnet_diagnostic.SA1401.severity = silent
+
+# CA1501: Avoid excessive inheritance
+dotnet_diagnostic.CA1501.severity = warning
+
+# CA1502: Avoid excessive complexity
+dotnet_diagnostic.CA1502.severity = warning
+
+# CA1505: Avoid unmaintainable code
+dotnet_diagnostic.CA1505.severity = warning
+
+# CA1506: Avoid excessive class coupling
+dotnet_diagnostic.CA1506.severity = warning
+
+# CA1506: Avoid excessive class coupling
+dotnet_diagnostic.CA1506.severity = warning
+
+# CA2213: Dispose IDisposable members
+dotnet_diagnostic.CA2213.severity=warning
+
+dotnet_diagnostic.CA1001.severity=warning
+dotnet_diagnostic.CA1070.severity=warning
+dotnet_diagnostic.CA1825.severity=warning
+dotnet_diagnostic.CA1841.severity=warning
+dotnet_diagnostic.CA1845.severity=warning
+dotnet_diagnostic.CA2016.severity=warning
+dotnet_diagnostic.SA1403.severity=warning
+dotnet_diagnostic.CA1018.severity=warning
+dotnet_diagnostic.CA1021.severity=error
+dotnet_diagnostic.CA1036.severity=warning
+dotnet_diagnostic.CA1050.severity=warning
+dotnet_diagnostic.CA1061.severity=warning
+dotnet_diagnostic.CA1067.severity=suggestion
+dotnet_diagnostic.CA1068.severity=suggestion
+dotnet_diagnostic.CA1069.severity=warning
+dotnet_diagnostic.CA1305.severity=warning
+dotnet_diagnostic.CA1304.severity=warning
+dotnet_diagnostic.CA1310.severity=warning
+dotnet_diagnostic.CA1821.severity=warning
+dotnet_diagnostic.CA1826.severity=warning
+dotnet_diagnostic.CA1827.severity=warning
+dotnet_diagnostic.CA1828.severity=warning
+dotnet_diagnostic.CA1829.severity=error
+dotnet_diagnostic.CA1830.severity=warning
+dotnet_diagnostic.CA1832.severity=warning
+dotnet_diagnostic.CA1833.severity=warning
+dotnet_diagnostic.CA1834.severity=warning
+dotnet_diagnostic.CA1835.severity=warning
+dotnet_diagnostic.CA1836.severity=warning
+dotnet_diagnostic.CA1842.severity=warning
+dotnet_diagnostic.CA1843.severity=warning
+dotnet_diagnostic.CA1844.severity=warning
+dotnet_diagnostic.CA1846.severity=warning
+dotnet_diagnostic.CA1847.severity=warning
+dotnet_diagnostic.CA2012.severity=warning
