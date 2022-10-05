@@ -1,0 +1,497 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>MessageBus</name>
+    </assembly>
+    <members>
+        <member name="M:MessageBus.IExceptionNotification.NotifyException(MessageBus.MessageId,System.Object,System.Exception)">
+            <summary>
+            Gets called when an exception occured within any handler. The parameter <paramref name="messageId"/>
+            is the correlation id of the message which got procssed. <paramref name="message"/> is the
+            actual message which got processed. Normally this can be something implementing <see cref="T:MessageBus.IMessageQuery`1"/>,
+            <see cref="T:MessageBus.IMessageEvent"/> or <see cref="T:MessageBus.IMessageCommand"/>. <paramref name="exception"/> is the exception
+            which didn't get caught within the handler itself.
+            </summary>
+            <remarks>The notification process main purpose is to implement logging or a custom dead letter. Do not
+            throw the provided exception.</remarks>
+        </member>
+        <member name="M:MessageBus.IMessageBusAwait.AwaitEvent``1(System.Func{``0,System.Boolean},System.Threading.CancellationToken)">
+            <summary>
+            Creates an awaitable handle for the specified <typeparamref name="TEvent"/>.
+            To await for the event, call <see cref="M:MessageBus.AwaitHandle`1.Await"/>. It will
+            return as soon as an event which matches the provided <paramref name="predicate"/>
+            was received.
+            </summary>
+        </member>
+        <member name="T:MessageBus.AwaitHandle`1">
+            <summary>
+            Allows to wait until the previous defined condition are met.
+            This class auto disposes itself within the <see cref="M:MessageBus.AwaitHandle`1.Await"/>. So you don't need
+            to call Dispose by yourself.
+            </summary>
+        </member>
+        <member name="M:MessageBus.IMessageBusHandler.RegisterEventHandler``1(MessageBus.IMessageEventHandler{``0})">
+            <summary>
+            Registers the provided <paramref name="handler"/> as a receiver for the
+            events defined by <typeparamref name="TEvent"/>. The returned value
+            is the subscription handle. When it gets disposed, the handler won't get any
+            new message. If <paramref name="handler"/> implements <see cref="T:MessageBus.ISubscriptionAwareHandler"/>,
+            the handler will get the returned handle automatically.
+            </summary>
+        </member>
+        <member name="M:MessageBus.IMessageBusHandler.RegisterEventHandler``1(MessageBus.IAsyncMessageEventHandler{``0})">
+            <summary>
+            Registers the provided async <paramref name="handler"/> as a receiver for the
+            events defined by <typeparamref name="TEvent"/>. The returned value
+            is the subscription handle. When it gets disposed, the handler won't get any
+            new message. If <paramref name="handler"/> implements <see cref="T:MessageBus.ISubscriptionAwareHandler"/>,
+            the handler will get the returned handle automatically.
+            </summary>
+        </member>
+        <member name="M:MessageBus.IMessageBusHandler.RegisterCommandHandler``1(MessageBus.IMessageCommandHandler{``0})">
+            <summary>
+            Registers the provided <paramref name="handler"/> as a receiver for the
+            commands defined by <typeparamref name="TCommand"/>. The returned value
+            is the subscription handle. When it gets disposed, the handler won't get any
+            new message. If <paramref name="handler"/> implements <see cref="T:MessageBus.ISubscriptionAwareHandler"/>,
+            the handler will get the returned handle automatically.
+            </summary>
+        </member>
+        <member name="M:MessageBus.IMessageBusHandler.RegisterCommandHandler``1(MessageBus.IAsyncMessageCommandHandler{``0})">
+            <summary>
+            Registers the provided async <paramref name="handler"/> as a receiver for the
+            commands defined by <typeparamref name="TCommand"/>. The returned value
+            is the subscription handle. When it gets disposed, the handler won't get any
+            new message. If <paramref name="handler"/> implements <see cref="T:MessageBus.ISubscriptionAwareHandler"/>,
+            the handler will get the returned handle automatically.
+            </summary>
+        </member>
+        <member name="M:MessageBus.IMessageBusHandler.RegisterQueryHandler``2(MessageBus.IMessageQueryHandler{``0,``1})">
+            <summary>
+            Registers the provided <paramref name="handler"/> as a receiver for the
+            queries defined by <typeparamref name="TQuery"/>. The returned value
+            is the subscription handle. When it gets disposed, the handler won't get any
+            new message. If <paramref name="handler"/> implements <see cref="T:MessageBus.ISubscriptionAwareHandler"/>,
+            the handler will get the returned handle automatically.
+            </summary>
+        </member>
+        <member name="M:MessageBus.IMessageBusHandler.RegisterQueryHandler``2(MessageBus.IAsyncMessageQueryHandler{``0,``1})">
+            <summary>
+            Registers the provided async <paramref name="handler"/> as a receiver for the
+            queries defined by <typeparamref name="TQuery"/>. The returned value
+            is the subscription handle. When it gets disposed, the handler won't get any
+            new message. If <paramref name="handler"/> implements <see cref="T:MessageBus.ISubscriptionAwareHandler"/>,
+            the handler will get the returned handle automatically.
+            </summary>
+        </member>
+        <member name="M:MessageBus.IMessageBusHandler.RegisterRpcHandler``2(MessageBus.IMessageRpcHandler{``0,``1})">
+            <summary>
+            Registers the provided <paramref name="handler"/> as a receiver for remote procedure
+            calls defined by <typeparamref name="TRpc"/>. The returned value is
+            the subscription handler. When it gets disposed, the handler won't get any
+            new message. If <paramref name="handler"/> implements <see cref="T:MessageBus.ISubscriptionAwareHandler"/>,
+            the handler will get the returned handle automatically.
+            </summary>
+        </member>
+        <member name="M:MessageBus.IMessageBusHandler.RegisterRpcHandler``2(MessageBus.IAsyncMessageRpcHandler{``0,``1})">
+            <summary>
+            Registers the provided async <paramref name="handler"/> as a receiver for remote procedure
+            calls defined by <typeparamref name="TRpc"/>. The returned value is
+            the subscription handler. When it gets disposed, the handler won't get any
+            new message. If <paramref name="handler"/> implements <see cref="T:MessageBus.ISubscriptionAwareHandler"/>,
+            the handler will get the returned handle automatically.
+            </summary>
+        </member>
+        <member name="M:MessageBus.IMessageBusPublishing.FireEvent``1(``0)">
+            <summary>
+            Fires the provided <paramref name="event"/> to all handlers which are
+            currently subscribed to the provided event type. This method
+            will return immediately.
+            </summary>
+            <exception cref="T:System.ObjectDisposedException">Is thrown if the object is already disposed.</exception>
+        </member>
+        <member name="M:MessageBus.IMessageBusPublishing.FireCommand``1(``0)">
+            <summary>
+            Fires the provided <paramref name="command"/> to all handlers which are
+            currently subscribed to the provided event type.
+            </summary>
+            <exception cref="T:System.ObjectDisposedException">Is thrown if the object is already disposed.</exception>
+        </member>
+        <member name="M:MessageBus.IMessageBusPublishing.FireCommandAndWait``1(``0,System.Threading.CancellationToken)">
+            <summary>
+            Fires the provided <paramref name="command"/> to one of the currently subscribed handlers for
+            the provided event type. This method will not return until the handler has sent back a response. If no handler for the
+            provided <paramref name="command"/> is available, this method will never return.
+            </summary>
+            <remarks>Normally you should not wait for a command result. If the handler is currently not available, the command
+            might get executed even after the <paramref name="cancellationToken"/> has been cancelled. If no cancellation token is set,
+            the call might return in the far future. If possible, use <see cref="M:MessageBus.IMessageBusPublishing.FireCommand``1(``0)"/>, fire events
+            within the handler itself and continue with the workflow after receiving these events.</remarks>
+            <exception cref="T:System.OperationCanceledException">Is thrown if the provided <paramref name="cancellationToken"/>
+            is cancelled.</exception>
+            <exception cref="T:System.ObjectDisposedException">Is thrown if the object is already disposed.</exception>
+            <exception cref="T:System.Exception">Exceptions which happened within the handler will get rethrown.</exception>
+        </member>
+        <member name="M:MessageBus.IMessageBusPublishing.FireQuery``2(``0,System.Threading.CancellationToken)">
+            <summary>
+            Fires the provided <paramref name="query"/> to one of the currently subscribed handlers for
+            the provided event type. This method will not return until the handler has sent back a response. If no handler for the
+            provided <paramref name="query"/> is available, this method will never return.
+            </summary>
+            <exception cref="T:System.OperationCanceledException">Is thrown if the provided <paramref name="cancellationToken"/>
+            is cancelled.</exception>
+            <exception cref="T:System.ObjectDisposedException">Is thrown if the object is already disposed.</exception>
+            <exception cref="T:System.Exception">Exceptions which happened within the handler will get rethrown.</exception>
+        </member>
+        <member name="M:MessageBus.IMessageBusPublishing.FireRpc``2(``0,System.Threading.CancellationToken)">
+            <summary>
+            Executes the remote procedure with the provided <paramref name="rpcParameter"/> to one of the currently
+            subscribed handlers. This method will not return until the handler has sent back a response. If no handler for the
+            provided <paramref name="rpcParameter"/> is available, this method will never return.
+            </summary>
+            <remarks>While a RPC might look identical to a query, it is semantically different. A query should not change any
+            state while an RPC doesn't have this constraint. However, if you want to go with asynchronious communication,
+            you should avoid RPC calls and replace them with Commands.</remarks>
+            <exception cref="T:System.OperationCanceledException">Is thrown if the provided <paramref name="cancellationToken"/>
+            is cancelled.</exception>
+            <exception cref="T:System.ObjectDisposedException">Is thrown if the object is already disposed.</exception>
+            <exception cref="T:System.Exception">Exceptions which happened within the handler will get rethrown.</exception>
+        </member>
+        <member name="M:MessageBus.MemoryMessageBrokerBuilder.InProcessBroker">
+            <summary>
+            Creates a <see cref="T:MessageBus.Messaging.IMessageBroker"/> which can be used within a single process.
+            </summary>
+        </member>
+        <member name="T:MessageBus.MessageBrokerMessageBus">
+            <summary>
+            This part of the event bus is responsible for the <see cref="T:MessageBus.IMessageBusAwait"/>
+            implementation.
+            </summary>
+            <summary>
+            A simple event bus which uses <see cref="T:MessageBus.Messaging.IMessageBroker"/> as the event transport mechansim.
+            </summary>
+            <summary>
+            This part of the event bus is responsible for the <see cref="T:MessageBus.IMessageBusHandler"/>
+            implementation.
+            </summary>
+            <summary>
+            This part of the event bus is responsible for the <see cref="T:MessageBus.IMessageBusPublishing"/>
+            implementation.
+            </summary>
+        </member>
+        <member name="M:MessageBus.MessageBrokerMessageBus.AwaitEvent``1(System.Func{``0,System.Boolean},System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:MessageBus.MessageBrokerMessageBus.RegisterEventHandler``1(MessageBus.IMessageEventHandler{``0})">
+            <inheritdoc/>
+        </member>
+        <member name="M:MessageBus.MessageBrokerMessageBus.RegisterEventHandler``1(MessageBus.IAsyncMessageEventHandler{``0})">
+            <inheritdoc/>
+        </member>
+        <member name="M:MessageBus.MessageBrokerMessageBus.RegisterCommandHandler``1(MessageBus.IMessageCommandHandler{``0})">
+            <inheritdoc/>
+        </member>
+        <member name="M:MessageBus.MessageBrokerMessageBus.RegisterCommandHandler``1(MessageBus.IAsyncMessageCommandHandler{``0})">
+            <inheritdoc/>
+        </member>
+        <member name="M:MessageBus.MessageBrokerMessageBus.RegisterQueryHandler``2(MessageBus.IMessageQueryHandler{``0,``1})">
+            <inheritdoc/>
+        </member>
+        <member name="M:MessageBus.MessageBrokerMessageBus.RegisterQueryHandler``2(MessageBus.IAsyncMessageQueryHandler{``0,``1})">
+            <inheritdoc/>
+        </member>
+        <member name="M:MessageBus.MessageBrokerMessageBus.RegisterRpcHandler``2(MessageBus.IMessageRpcHandler{``0,``1})">
+            <inheritdoc/>
+        </member>
+        <member name="M:MessageBus.MessageBrokerMessageBus.RegisterRpcHandler``2(MessageBus.IAsyncMessageRpcHandler{``0,``1})">
+            <inheritdoc/>
+        </member>
+        <member name="M:MessageBus.MessageBrokerMessageBus.FireEvent``1(``0)">
+            <inheritdoc/>
+        </member>
+        <member name="M:MessageBus.MessageBrokerMessageBus.FireCommand``1(``0)">
+            <inheritdoc/>
+        </member>
+        <member name="M:MessageBus.MessageBrokerMessageBus.FireCommandAndWait``1(``0,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:MessageBus.MessageBrokerMessageBus.FireQuery``2(``0,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:MessageBus.MessageBrokerMessageBus.FireRpc``2(``0,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:MessageBus.MessageBusPublishTimeoutExtensions.FireCommandAndWait``1(MessageBus.IMessageBusPublishing,``0,System.TimeSpan)">
+            <summary>synchronious 
+            Executes the provided <paramref name="command"/> and waits for its execution. If the execution took longer than
+            the provided <paramref name="timeout"/>, an <see cref="T:System.OperationCanceledException"/> will get thrown.
+            See <see cref="M:MessageBus.IMessageBusPublishing.FireCommandAndWait``1(``0,System.Threading.CancellationToken)"/> for details.
+            </summary>
+            <exception cref="T:System.OperationCanceledException">Is thrown if the command wasn't handled within the specified <paramref name="timeout"/>.</exception>
+        </member>
+        <member name="M:MessageBus.MessageBusPublishTimeoutExtensions.FireQuery``2(MessageBus.IMessageBusPublishing,``0,System.TimeSpan)">
+            <summary>
+            Executes the provided <paramref name="query"/> and waits for its return value. If the execution took longer than
+            the provided <paramref name="timeout"/>, an <see cref="T:System.OperationCanceledException"/> will get thrown.
+            See <see cref="M:MessageBus.IMessageBusPublishing.FireQuery``2(``0,System.Threading.CancellationToken)"/> for details.
+            </summary>
+            <exception cref="T:System.OperationCanceledException">Is thrown if the command wasn't handled within the specified <paramref name="timeout"/>.</exception>
+        </member>
+        <member name="M:MessageBus.MessageBusPublishTimeoutExtensions.FireRpc``2(MessageBus.IMessageBusPublishing,``0,System.TimeSpan)">
+            <summary>
+            Executes the provided <paramref name="rpcParameter"/> and waits for its return value. If the execution took longer than
+            the provided <paramref name="timeout"/>, an <see cref="T:System.OperationCanceledException"/> will get thrown.
+            See <see cref="M:MessageBus.IMessageBusPublishing.FireRpc``2(``0,System.Threading.CancellationToken)"/> for details.
+            </summary>
+            <exception cref="T:System.OperationCanceledException">Is thrown if the command wasn't handled within the specified <paramref name="timeout"/>.</exception>
+        </member>
+        <member name="T:MessageBus.MessageId">
+            <summary>
+            Uniquely identifies a single request. General rule of thumb:
+            <list type="bullet">
+                <item>Commands and queries create a new MessageId by using <see cref="M:MessageBus.MessageId.NewId"/> or use <see cref="P:MessageBus.MessageId.CausationId"/> when having an
+                existing CorrelationId within a Command or Query handler.</item>
+                <item>If you create Commands because of an event, create a new CorrelationId by using <see cref="M:MessageBus.MessageId.CausedBy(MessageBus.MessageId)"/> and
+                pass the MessageId of the event.</item>
+            </list>
+            </summary>
+        </member>
+        <member name="P:MessageBus.MessageId.Value">
+            <summary>
+            The raw value.
+            </summary>
+        </member>
+        <member name="P:MessageBus.MessageId.CausationId">
+            <summary>
+            The correlationId which is the reason this message happened.
+            Will be <c>null</c> if no causation id exists.
+            </summary>
+        </member>
+        <member name="P:MessageBus.Messaging.IMessage.Payload">
+            <summary>
+            The payload of the message.
+            </summary>
+        </member>
+        <member name="P:MessageBus.Messaging.IMessage`1.Payload">
+            <summary>
+            The payload of the message.
+            </summary>
+        </member>
+        <member name="M:MessageBus.Messaging.IMessageBroker.Events(MessageBus.Messaging.TopicName,MessageBus.Messaging.EventsOptions)">
+            <summary>
+            Gets the channel with the provided <paramref name="topic"/> name used for broadcasting events.
+            If the channel didn't exist before, it will automatically get created.
+            Event channels will not try to resend message if they weren't acknowledged.
+            If multiple events are pending for a single event listener, each event
+            will get forwarded to the listener separately. The handler won't get called simulatinously for
+            multiple events. The execution order of messages is not guaranteed to be the
+            same as the order the messages got published. The <paramref name="options"/> define the
+            desired behavior of the events channel. If a channel is not created within this call,
+            the provided value for <paramref name="options"/> is ignored.
+            </summary>
+            <exception cref="T:System.InvalidOperationException">Is thrown if the provided <paramref name="topic"/>
+            already exists but it isn't a events channel.</exception>
+        </member>
+        <member name="M:MessageBus.Messaging.IMessageBroker.Commands(MessageBus.Messaging.TopicName)">
+            <summary>
+            Gets the command channel with the provided <paramref name="topic"/> name.
+            If the channel didn't exist before, it will automatically get created.
+            Command channels will resend a message if it hasn't been acknowledged or rejected.
+            A message will only get send to one subscriber. Each subscriber will only
+            receive one message at a time. The execution order of messages is not guaranteed to be the
+            same as the order the messages got published.
+            </summary>
+            <exception cref="T:System.InvalidOperationException">Is thrown if the provided <paramref name="topic"/>
+            already exists but it isn't a command channel.</exception>
+        </member>
+        <member name="M:MessageBus.Messaging.IMessageBroker.Publish``1(``0,System.Collections.Generic.IReadOnlyList{MessageBus.Messaging.TopicName})">
+            <summary>
+            Publishes the provided <paramref name="message"/> to all
+            channels specified in <paramref name="topics"/>. If a channel
+            does not exist, it will get skipped silently.
+            </summary>
+        </member>
+        <member name="F:MessageBus.Messaging.EventsOptions.None">
+            <summary>
+            No special channel options provided.
+            </summary>
+        </member>
+        <member name="F:MessageBus.Messaging.EventsOptions.Temporary">
+            <summary>
+            The channel is only used temporary and can be removed
+            as soon as its last subscription was disposed.
+            </summary>
+        </member>
+        <member name="M:MessageBus.Messaging.IMessageBrokerExtensions.Events(MessageBus.Messaging.IMessageBroker,MessageBus.Messaging.TopicName)">
+            <summary>
+            Gets the channel with the provided <paramref name="topic"/> name used for broadcasting events.
+            If the channel didn't exist before, it will automatically get created.
+            Event channels will not try to resend message if they weren't acknowledged.
+            If multiple events are pending for a single event listener, each event
+            will get forwarded to the listener separately. The handler won't get called simulatinously for
+            multiple events. The execution order of messages is not guaranteed to be the
+            same as the order the messages got published.
+            </summary>
+            <exception cref="T:System.InvalidOperationException">Is thrown if the provided <paramref name="topic"/>
+            already exists but it isn't a events channel.</exception>
+        </member>
+        <member name="P:MessageBus.Messaging.IMessageOperation.State">
+            <summary>
+            Gets the state of the message.
+            </summary>
+        </member>
+        <member name="M:MessageBus.Messaging.IMessageOperation.Ack">
+            <summary>
+            Indicates that the message has been processed.
+            The message won't get send again.
+            </summary>
+        </member>
+        <member name="M:MessageBus.Messaging.IMessageOperation.Nack">
+            <summary>
+            Indicates that the message has not been processed.
+            The message won't get send again.
+            </summary>
+        </member>
+        <member name="T:MessageBus.Messaging.InProcess.BlockingEventExecuter">
+            <summary>
+            Executes all provided actions within the caller thread.
+            </summary>
+            <remarks>Do not use this class in production - it can result in a dead lock.</remarks>
+        </member>
+        <member name="M:MessageBus.Messaging.InProcess.IEventExecuter.Wrap(System.Action)">
+            <summary>
+            Wraps the provided <paramref name="action"/>. The returned action
+            will get called to perform the <paramref name="action"/>.
+            </summary>
+        </member>
+        <member name="M:MessageBus.Messaging.InProcess.IWorkFactory.HasWork">
+            <summary>
+            Returns true if there is work available, otherwise false. Note that this
+            method won't wait for work to be available.
+            </summary>
+        </member>
+        <member name="M:MessageBus.Messaging.InProcess.IWorkFactory.TryWaitForWork(System.TimeSpan,System.Threading.CancellationToken,MessageBus.Messaging.InProcess.IWorkFactory.IWork@)">
+            <summary>
+            Waits for the next work item to be available. Returns true if work is available, otherwise false.
+            Returns false if the specified <paramref name="timeout"/> has been reached.
+            If the result is true, a <paramref name="workToExecute"/> item gets returned.
+            The returned item must get executed by calling <see cref="M:MessageBus.Messaging.InProcess.IWorkFactory.IWork.Execute"/>.
+            </summary>
+            <exception cref="T:System.OperationCanceledException">Is thrown if <paramref name="cancellationToken"/> is
+            cancelled.</exception>
+        </member>
+        <member name="M:MessageBus.Messaging.InProcess.IWorkFactory.IWork.Execute">
+            <summary>
+            Do the work.
+            </summary>
+        </member>
+        <member name="M:MessageBus.Messaging.InProcess.MessageBrokerOptions.Default">
+            <summary>
+            Creates an options instance with the default options.
+            </summary>
+        </member>
+        <member name="M:MessageBus.Messaging.InProcess.MessageBrokerOptions.BlockingManual(MessageBus.Messaging.InProcess.Scheduler.ManualScheduler)">
+            <summary>
+            Creates an options instance which is useful when using manual event execution.
+            </summary>
+            <remarks>Do not use this options in production.</remarks>
+        </member>
+        <member name="T:MessageBus.Messaging.InProcess.TaskedEventExecution">
+            <summary>
+            Executes all given actions within its own <see cref="T:System.Threading.Tasks.Task"/>.
+            </summary>
+        </member>
+        <member name="M:MessageBus.Messaging.IPublishable.Publish``1(``0)">
+            <summary>
+            Publish the provided <paramref name="message"/> to the
+            current channel. Publishing a message won't directly
+            call any subscribers.
+            </summary>
+        </member>
+        <member name="M:MessageBus.Messaging.ISubscribable.Subscribe``1(System.Action{MessageBus.Messaging.IMessage{``0}})">
+            <summary>
+            Add a new subscription to the current channel. The
+            passed <paramref name="messageHandler"/> will get called
+            for each event which got published to the current channel.
+            Note: depending on the used broker scheduler, the
+            <paramref name="messageHandler"/> callback will get called
+            from multiple threads and might even get called simultaniously
+            for different events. The <typeparamref name="T"/> should
+            match the type of the message which gets send with
+            <see cref="M:MessageBus.Messaging.IPublishable.Publish``1(``0)"/>.
+            </summary>
+        </member>
+        <member name="M:MessageBus.Messaging.ISubscribable.Subscribe(System.Action{MessageBus.Messaging.IMessage})">
+            <summary>
+            Add a new subscription to the current channel. The
+            passed <paramref name="messageHandler"/> will get called
+            for each event which got published to the current channel.
+            Note: depending on the used broker scheduler, the
+            <paramref name="messageHandler"/> callback will get called
+            from multiple threads and might even get called simultaniously
+            for different events.
+            </summary>
+        </member>
+        <member name="T:MessageBus.Messaging.LinqNullableContextExtensions">
+            <summary>
+            Required extension to keep nullable-context enable and to remove
+            the null warnings (see https://stackoverflow.com/a/58373257/42921).
+            </summary>
+        </member>
+        <member name="F:MessageBus.Messaging.MessageState.Initial">
+            <summary>
+            The initial state of the message.
+            </summary>
+        </member>
+        <member name="F:MessageBus.Messaging.MessageState.Acknowledged">
+            <summary>
+            <see cref="M:MessageBus.Messaging.IMessageOperation.Ack"/> has been called.
+            </summary>
+        </member>
+        <member name="F:MessageBus.Messaging.MessageState.NotAcknowledged">
+            <summary>
+            <see cref="M:MessageBus.Messaging.IMessageOperation.Nack"/> has been called.
+            </summary>
+        </member>
+        <member name="M:MessageBus.NonBlockingMessageHandlerExtensions.WithParallelExecution``1(MessageBus.IAsyncMessageCommandHandler{``0})">
+            <summary>
+            Wraps the provided <paramref name="handler"/> with another handler which will execute the
+            <see cref="M:MessageBus.IAsyncMessageCommandHandler`1.HandleAsync(`0)"/> within its own task. This
+            means that multiple threads will execute the wrapped handler simultaniously. Only use this
+            method if you are sure that the wrapped handler is thread safe and stateless.
+            </summary>
+            <remarks>If the provided <paramref name="handler"/> implements <see cref="T:MessageBus.ISubscriptionAwareHandler"/>, the result
+            will implement that interface as well.</remarks>
+        </member>
+        <member name="M:MessageBus.NonBlockingMessageHandlerExtensions.WithParallelExecution``1(MessageBus.IMessageCommandHandler{``0})">
+            <summary>
+            Wraps the provided <paramref name="handler"/> with another handler which will execute the
+            <see cref="M:MessageBus.IMessageCommandHandler`1.Handle(`0)"/> within its own task. This
+            means that multiple threads will execute the wrapped handler simultaniously. Only use this
+            method if you are sure that the wrapped handler is thread safe and stateless.
+            </summary>
+            <remarks>If the provided <paramref name="handler"/> implements <see cref="T:MessageBus.ISubscriptionAwareHandler"/>, the result
+            will implement that interface as well.</remarks>
+        </member>
+        <member name="M:MessageBus.NonBlockingMessageHandlerExtensions.WithParallelExecution``1(MessageBus.IAsyncMessageEventHandler{``0})">
+            <summary>
+            Wraps the provided <paramref name="handler"/> with another handler which will execute the
+            <see cref="M:MessageBus.IAsyncMessageEventHandler`1.HandleAsync(`0)"/> within its own task. This
+            means that multiple threads will execute the wrapped handler simultaniously. Only use this
+            method if you are sure that the wrapped handler is thread safe and stateless.
+            </summary>
+            <remarks>If the provided <paramref name="handler"/> implements <see cref="T:MessageBus.ISubscriptionAwareHandler"/>, the result
+            will implement that interface as well.</remarks>
+        </member>
+        <member name="M:MessageBus.NonBlockingMessageHandlerExtensions.WithParallelExecution``1(MessageBus.IMessageEventHandler{``0})">
+            <summary>
+            Wraps the provided <paramref name="handler"/> with another handler which will execute the
+            <see cref="M:MessageBus.IMessageEventHandler`1.Handle(`0)"/> within its own task. This
+            means that multiple threads will execute the wrapped handler simultaniously. Only use this
+            method if you are sure that the wrapped handler is thread safe and stateless.
+            </summary>
+            <remarks>If the provided <paramref name="handler"/> implements <see cref="T:MessageBus.ISubscriptionAwareHandler"/>, the result
+            will implement that interface as well.</remarks>
+        </member>
+    </members>
+</doc>
