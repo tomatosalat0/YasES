@@ -1,3 +1,0 @@
-[submodule "libs/MessageBus"]
-	path = libs/MessageBus
-	url = https://github.com/tomatosalat0/MessageBus.git
